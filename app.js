@@ -834,17 +834,34 @@ function mkRestoreState(state){
   if(Number.isFinite(state.monthlyBudget))monthlyBudget=state.monthlyBudget;
   if(Number.isSafeInteger(state.loanGroupSerial))loanGroupSerial=state.loanGroupSerial;
 }
-function mkQueueSave(){
-  if(!mkStorageReady)return;
-  clearTimeout(mkSaveTimer);
-  mkSaveTimer=setTimeout(()=>{
-    MKStorage.save(mkState()).catch(e=>{
-      mkStorageReady=false;
-      console.error('Money Keeper: 保存失敗',e);
-      alert('保存に失敗しました。これ以上の入力はせず、画面を閉じずにバックアップ方法を確認してください。');
-    });
-  },200);
+// Persist a snapshot immediately on every data-changing render. The storage layer
+// serializes writes; no 200ms debounce window where closing loses the change.
+let mkPendingSaves=0, mkSaveFailed=false;
+function mkSaveStatus(message,failed=false){
+  const el=document.getElementById('miniSaveStatus');
+  if(el){el.textContent=message;el.style.color=failed?'#b94242':'#52645a';}
 }
+function mkQueueSave(){
+  if(!mkStorageReady||mkSaveFailed)return;
+  let snapshot;
+  try{snapshot=mkState();}catch(e){mkSaveFailed=true;mkSaveStatus('保存失敗：入力を中止してください',true);alert('保存データを準備できませんでした。画面を閉じずに確認してください。');return;}
+  mkPendingSaves++;
+  mkSaveStatus('保存中…');
+  MKStorage.save(snapshot).then(()=>{
+    mkPendingSaves--;
+    if(!mkSaveFailed&&mkPendingSaves===0)mkSaveStatus('保存済み ✓');
+  }).catch(e=>{
+    mkPendingSaves--;
+    if(mkSaveFailed)return;
+    mkSaveFailed=true;mkStorageReady=false;
+    console.error('Money Keeper Mini: 保存失敗',e);
+    mkSaveStatus('保存失敗：入力を中止してください',true);
+    alert('保存に失敗しました。これ以上の入力はせず、画面を閉じずにバックアップ方法を確認してください。');
+  });
+}
+window.addEventListener('beforeunload',e=>{
+  if(mkPendingSaves>0){e.preventDefault();e.returnValue='';}
+});
 // Some edit actions re-render only their own component; persist those as well.
 function mkWrapSave(name){const fn=globalThis[name];if(typeof fn!=='function')return;
   globalThis[name]=function(...args){const result=fn.apply(this,args);mkQueueSave();return result};
@@ -857,6 +874,7 @@ async function mkBoot(){
     const saved=await MKStorage.load();
     if(saved) mkRestoreState(saved);
     mkStorageReady=true;
+    mkSaveStatus('読み込み完了');
   } catch(e) {
     console.error('Money Keeper: 保存データの読み込みに失敗',e);
     mkStorageReady=false;

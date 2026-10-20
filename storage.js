@@ -16,6 +16,28 @@ const MKStorage=(()=>{
  async function load(){const payload=await get();return payload?decrypt(payload):null}
  function save(data){queue=queue.catch(()=>{}).then(async()=>{if(!key)throw Error('Locked');const item=await encrypt(data);await put({...item,salt:MKStorage._salt,format:'mini-encrypted-v1'})});return queue}
  async function exportEncrypted(data){await save(data);await queue;return {format:'money-keeper-mini-encrypted',version:1,exportedAt:new Date().toISOString(),payload:await get()}}
- async function importEncrypted(obj,password){if(obj?.format!=='money-keeper-mini-encrypted'||obj.version!==1)throw Error('未対応の形式');const item=obj.payload;const candidate=await derive(password,unb64(item.salt));const decoded=JSON.parse(decoder.decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(item.iv)},candidate,unb64(item.ciphertext))));if(!Array.isArray(decoded.txs))throw Error('記録データが不正');return decoded}
+ function validateBackupState(state){
+  const plain=x=>x!==null&&typeof x==='object'&&!Array.isArray(x);
+  if(!plain(state)||!Array.isArray(state.txs)||!Array.isArray(state.eventsData))throw Error('記録またはイベント情報が不正です');
+  if(state.txs.length>200000||state.eventsData.length>10000)throw Error('記録件数が多すぎます');
+  const ids=new Set();
+  for(const t of state.txs){
+    if(!plain(t)||typeof t.id!=='string'||!t.id||ids.has(t.id)||
+       typeof t.date!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(t.date)||
+       typeof t.type!=='string'||!['expense','income','transfer','charge','lend','borrowed','repay','receive','loanBorrow','loanLend'].includes(t.type)||
+       typeof t.amount!=='number'||!Number.isFinite(t.amount)||t.amount<0||
+       (t.eventTag!==undefined&&typeof t.eventTag!=='string'))throw Error('記録の形式が不正です');
+    ids.add(t.id);
+  }
+  for(const e of state.eventsData){if(!plain(e)||typeof e.name!=='string')throw Error('イベント情報が不正です');}
+  for(const name of ['loans','cashbook','snapshots','wishes','recurring','deletedEventNames','loanArchivedPeople','loanGroups']){
+    if(state[name]!==undefined&&!Array.isArray(state[name]))throw Error(name+' の形式が不正です');
+  }
+  if(state.balances!==undefined){
+    if(!plain(state.balances)||Object.values(state.balances).some(x=>typeof x!=='number'||!Number.isFinite(x)))throw Error('残高情報が不正です');
+  }
+  return state;
+ }
+ async function importEncrypted(obj,password){if(obj?.format!=='money-keeper-mini-encrypted'||obj.version!==1)throw Error('未対応の形式');const item=obj.payload;const candidate=await derive(password,unb64(item.salt));const decoded=JSON.parse(decoder.decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(item.iv)},candidate,unb64(item.ciphertext))));return validateBackupState(decoded)}
  return {unlock,load,save,exportEncrypted,importEncrypted};
 })();
