@@ -1,0 +1,635 @@
+:root{--bg:#fff7f9;--card:#fffdfd;--ink:#222;--muted:#7b7074;--line:#eadfe3;--accent:#b86b86;--soft:#fbeef3;--good:#16845a;--bad:#c54d4d}*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif;color:var(--ink)}.app{max-width:520px;margin:auto;padding-bottom:88px;min-height:100vh}header{padding:18px}.head{display:flex;justify-content:space-between;align-items:center;gap:10px}h1{font-size:28px;margin:0}.sub,.small{font-size:12px;color:var(--muted);line-height:1.45}.badge{font-size:12px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:8px 10px}.page{display:none}.page.active{display:block}section{padding:7px 14px}.card{background:var(--card);border:1px solid #eadfe3;border-radius:20px;padding:16px;margin-bottom:12px}.row{display:flex;align-items:center;justify-content:space-between;gap:10px}.mid{font-size:18px;font-weight:800}.big{font-size:30px;font-weight:800}.label{font-size:12px;color:var(--muted)}.div{height:1px;background:var(--line);margin:12px 0}.item{padding:10px 0;border-bottom:1px solid var(--line)}.item:last-child{border-bottom:0}.item-title{font-weight:800;font-size:14px}.item-meta{font-size:12px;color:var(--muted);line-height:1.4;margin-top:3px}.pill{font-size:11px;background:var(--soft);color:#5059ce;border-radius:999px;padding:4px 8px}.neg{color:var(--bad);font-weight:800}.pos{color:var(--good);font-weight:800}button{font:inherit;border:0;cursor:pointer}.btn{width:100%;padding:13px;border-radius:13px;background:#222;color:#fff;font-weight:800}.outline,.ghost{padding:9px 11px;border-radius:11px;font-weight:700}.outline{background:#fff;border:1px solid var(--line);color:#333}.ghost{background:#f2f2f5;color:#333}.choice-row{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 12px}.choice{padding:9px 12px;border-radius:999px;border:1px solid #dedfe4;background:#fff;font-weight:700;font-size:14px}.choice.active{background:#222;color:#fff;border-color:#222}.mini{padding:8px 10px;border-radius:11px;background:#f1f1f4;border:1px solid #e3e3e7;font-weight:700;font-size:13px}.mini.active{background:#e8eaff;color:#414bd0;border-color:#bdc1ff}.field{margin:10px 0}.field label{display:block;font-size:12px;color:#555;font-weight:700;margin-bottom:5px}input,textarea,select{width:100%;padding:11px 12px;border:1px solid #dedfe4;border-radius:12px;font-size:15px;background:#fff}.picker{width:100%;padding:11px 12px;border:1px solid #dedfe4;background:#fff;border-radius:12px;display:flex;justify-content:space-between;align-items:center;font-size:15px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.hidden{display:none!important}.partner{margin:10px 0 10px 10%;padding:12px;border:1px solid #d9dcec;border-radius:14px;background:#fafbff}.partner .title{font-size:11px;font-weight:800;color:#5f66b4}.optional{border:1px dashed #d9d9df;border-radius:14px;background:#fafafa;padding:10px;margin-top:12px}.action{margin-top:8px;padding:10px 11px;border-radius:12px;background:#fff1ef;border:1px solid #ffd2cc}.action strong{color:#b94242}.bottom{position:fixed;left:50%;bottom:0;transform:translateX(-50%);width:min(520px,100%);display:grid;grid-template-columns:repeat(6,1fr);background:rgba(255,255,255,.98);border-top:1px solid var(--line);padding:6px 3px calc(7px + env(safe-area-inset-bottom));z-index:30}.nav{background:transparent;color:#777;font-size:10px;padding:6px 1px}.nav .ico{display:block;font-size:19px;line-height:1;margin-bottom:3px}.nav.active{color:#111;font-weight:800}.menu-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}.menu-card{padding:18px 10px;border:1px solid var(--line);background:#fff;border-radius:15px;font-weight:800}.menu-card .ico{display:block;font-size:28px;margin-bottom:4px}.tabs2{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:#f8eef2;padding:4px;border-radius:12px}.tabs2 button{padding:9px;background:transparent;color:#666;border-radius:9px}.tabs2 button.active{background:#fff;color:#222;font-weight:800}.passbook{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px}.passbook th,.passbook td{padding:8px 4px;border-bottom:1px solid var(--line);text-align:right;vertical-align:top}.passbook th:first-child,.passbook th:nth-child(2),.passbook td:first-child,.passbook td:nth-child(2){text-align:left}.progress{height:8px;background:#ececf0;border-radius:99px;overflow:hidden;margin-top:6px}.progress>div{height:100%;background:#6872f5}.modal{position:fixed;inset:0;background:rgba(0,0,0,.38);z-index:100;display:flex;justify-content:center;align-items:flex-end}.sheet{width:min(520px,100%);max-height:78vh;overflow:auto;background:#fff;border-radius:22px 22px 0 0;padding:16px}.sheet-title{font-size:17px;font-weight:800;margin-bottom:10px}.picklist{display:grid;gap:4px}.pickitem{padding:12px;border-radius:11px;background:#f8f8fa;text-align:left;font-weight:700}.confirm{align-items:center;padding:20px}.confirmbox{width:min(420px,92vw);background:#fff;border-radius:20px;padding:20px;text-align:center}.confirmbox h3{margin:0 0 8px}.confirm-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}.eventcard{background:linear-gradient(135deg,#f4f0ff,#eff6ff)}
+.pay-row{display:flex;gap:5px;margin:7px 0}.pay-row .mini{flex:1;min-width:0;padding:8px 4px;font-size:12px;white-space:nowrap}.pay-extra{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 12px}.pay-extra .mini{font-size:12px}.rec-wrap{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.rec-main{min-width:0;flex:1}.rec-side{text-align:right;flex:none}.rec-actions{display:flex;justify-content:flex-end;gap:5px;margin-top:6px}.ghost.sm{padding:6px 8px;font-size:11px}.cat-mini{display:inline-block;margin-left:5px;padding:2px 6px;border-radius:999px;background:#f1f1f4;color:#666;font-size:10px}.event-head{width:100%;background:transparent;text-align:left;padding:0}.event-summary{display:flex;justify-content:space-between;align-items:center;gap:10px}.event-detail{margin-top:11px;padding-top:11px;border-top:1px solid var(--line)}.event-form{border:1px dashed #d9d9df;background:#fafafa}.switchline{display:flex;align-items:center;gap:8px;margin:8px 0}.switchline input{width:auto}.subhead{font-size:13px;font-weight:800;margin-top:12px}.event-category-add{display:grid;grid-template-columns:1fr 110px;gap:7px;align-items:end}.mutedbox{padding:9px 10px;border-radius:11px;background:#f5f5f7;color:#666;font-size:12px;margin-top:7px}.billbox{border:1px solid var(--line);border-radius:14px;padding:12px;margin:10px 0;background:#fff}.billhead{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.billstatus{font-size:11px;border-radius:999px;padding:4px 8px;background:#f2f2f5;color:#555;white-space:nowrap}.billstatus.candidate{background:#fff3dc;color:#8a5b00}.billstatus.confirmed{background:#e9f7f0;color:#116a49}.billline{display:grid;grid-template-columns:70px 1fr auto;gap:7px;align-items:start;padding:8px 0;border-bottom:1px solid var(--line);font-size:12px}.billline:last-child{border-bottom:0}.billline .amt{font-weight:800;text-align:right}.bill-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}.bill-actions .ghost{font-size:11px;padding:6px 8px}.reconcile{margin-top:10px;padding:10px;border-radius:12px;background:#fafafa;border:1px dashed #d9d9df}.filter-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}.filter-chip{padding:8px 10px;border:1px solid var(--line);background:#fff;border-radius:999px;font-size:12px;font-weight:700}.filter-chip.active{background:var(--soft);border-color:#c9cdfd;color:#414bd0}.history-search{margin-top:9px}.pastnames{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}.pastname{padding:7px 9px;border-radius:999px;background:#f1f1f4;border:1px solid #e1e1e5;font-size:12px;font-weight:700}.warnbox{margin-top:8px;padding:9px 10px;border-radius:11px;background:#fff7e8;border:1px solid #f1dfb6;color:#775100;font-size:12px}.danger{background:#fff1f1;color:#a33434;border:1px solid #f1caca}.bill-edit{font-size:11px;padding:6px 8px}
+
+.loan-person-card{background:#fff;border:1px solid #e7e7ea;border-radius:20px;padding:16px;margin-bottom:12px}
+.person-candidates{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.person-candidate{padding:6px 9px;border-radius:999px;background:#f1f1f4;border:1px solid #e1e1e5;color:#444;font-size:11px;font-weight:700}
+.settlement-row{display:flex;align-items:center;gap:8px;margin:11px 0;color:#6a70a8;font-size:11px;font-weight:800}
+.settlement-row:before,.settlement-row:after{content:"";height:1px;background:#dfe1ef;flex:1}
+.settlement-row .date{font-weight:700;color:#8a8da8;white-space:nowrap}
+
+/* v12: 記録画面を少しだけコンパクトに。操作性は維持 */
+.record-top-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:9px;align-items:end;margin-top:2px}
+.record-top-grid .field{min-width:0;margin:7px 0}
+.record-top-grid input{min-width:0}
+.money-input{display:flex;align-items:center;border:2px solid #cfd1d9;border-radius:12px;background:#fff;min-height:46px;overflow:hidden}
+.money-input:focus-within{border-color:#5965f2;box-shadow:0 0 0 2px rgba(89,101,242,.10)}
+.money-prefix{font-size:18px;font-weight:900;padding-left:12px;color:#333;line-height:1}
+.money-input input{border:0!important;border-radius:0!important;padding:10px 10px 10px 6px!important;font-size:19px!important;font-weight:800;background:transparent;outline:none;min-width:0}
+#categoryField{margin:8px 0}
+#categoryField .picker{padding-top:10px;padding-bottom:10px}
+#paymentField{margin:8px 0}
+.optional{border:1px dashed #d9d9df;background:#fafafa;padding:0;border-radius:14px;margin-top:7px;overflow:hidden}
+.optional-head{width:100%;display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:#fafafa;color:#555;font-size:12px;font-weight:800;text-align:left}
+#optionalInner:not(.hidden){padding:0 10px 8px;border-top:1px dashed #d9d9df}
+#optionalInner .field{margin:8px 0}
+#record .card{padding-top:14px}
+#record #modes{margin-top:7px;margin-bottom:5px}
+#record .btn.record-save{margin-top:9px!important}
+.interaction-row{display:flex;align-items:center;gap:6px;margin:0 0 8px;min-width:0}
+.interaction-row>.choice{flex:none}
+.interaction-tabs{display:flex;gap:5px;min-width:0;flex:1}
+.interaction-tabs .mini{padding:7px 9px;font-size:12px;flex:1;min-width:0}
+.interaction-details{margin:-1px 0 7px 0}
+.loan-detail-row{margin:0 0 5px 0}
+.loan-detail-row .mini{padding:7px 10px}
+.more-pay{flex:1;min-width:0;padding:7px 4px;border-radius:10px;background:#fbfbfc;color:#777;border:1px dashed #d2d3da;font-weight:700;font-size:11px;white-space:nowrap}
+.more-pay:active{background:#f0f0f3}
+#otherPays{display:block;margin:5px 0 10px}
+#otherPays.hidden{display:none!important}
+#otherPays .pay-row{margin:5px 0}
+@media(max-width:360px){.record-top-grid{grid-template-columns:46% 54%;gap:7px}.record-top-grid input{font-size:14px}.money-input input{font-size:18px!important}.pay-row .mini{font-size:11px;padding-left:2px;padding-right:2px}.interaction-tabs .mini{font-size:11px;padding-left:5px;padding-right:5px}.more-pay{font-size:10px}}
+
+/* v14: やりとり・チャージ・入金を整理 */
+.interaction-tabs .mini{padding:6px 8px;font-size:11.5px;font-weight:600;background:#f7f7f9;border-color:#e7e7eb;color:#666}
+.interaction-tabs .mini.active{background:#f0efff;color:#555dc1;border-color:#d8d5ff;font-weight:700}
+.loan-detail-row{gap:5px;margin:0 0 6px}
+.loan-detail-row .mini{padding:6px 9px;font-size:11px;font-weight:600;background:#fbfbfc;border-color:#ececf0;color:#6f6f76}
+.loan-detail-row .mini.active{background:#f5f2ff;color:#5e58ad;border-color:#ded8f7;font-weight:700}
+.partner-tint input{background:#f8f6ff;border-color:#ddd8f4}
+.partner-tint label{color:#6660a8!important}
+.lend-amount-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.lend-helper{margin-top:2px}
+#chargeSources{margin-top:7px}
+.charge-source-row{display:flex;gap:5px;margin:5px 0}
+.charge-source-row .mini{flex:1;min-width:0;padding:8px 4px;font-size:12px;white-space:nowrap}
+.inline-setting{border:0;background:transparent;color:#5965f2;font-weight:700;font-size:11px;padding:2px 4px;text-decoration:underline;text-underline-offset:2px}
+.income-pay-row{display:flex;gap:5px;margin:6px 0}
+.income-pay-row .mini{flex:1;min-width:0;padding:8px 4px;font-size:12px;white-space:nowrap}
+@media(max-width:360px){.interaction-tabs .mini{font-size:10.5px;padding:6px 5px}.loan-detail-row .mini{font-size:10.5px}.charge-source-row .mini,.income-pay-row .mini{font-size:11px;padding-left:2px;padding-right:2px}}
+
+/* step2: 貸し借り画面を1人選択式＋整理モードに */
+.loan-person-tabs{display:flex;gap:6px;overflow-x:auto;padding:2px 0 8px;scrollbar-width:none}.loan-person-tabs::-webkit-scrollbar{display:none}
+.loan-person-tab{flex:none;padding:7px 10px;border-radius:999px;background:#f1f1f4;border:1px solid #e3e3e7;color:#555;font-size:12px;font-weight:700}.loan-person-tab.active{background:#222;color:#fff;border-color:#222}
+.loan-person-tab.archive{background:#fff;border-style:dashed;color:#777}
+.loan-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px}.loan-card-actions{display:flex;gap:5px;flex:none}.loan-card-actions .ghost{padding:6px 8px;font-size:11px}
+.loan-record{padding:9px 0;border-top:1px solid var(--line)}.loan-record:first-of-type{border-top:0}.loan-record-main{display:flex;align-items:center;gap:7px;min-width:0}.loan-record-core{display:flex;align-items:baseline;gap:7px;min-width:0;flex:1;white-space:nowrap}.loan-record-date{font-size:12px;color:#777;flex:none}.loan-record-kind{font-size:13px;font-weight:700;min-width:0}.loan-record-amt{font-size:14px;font-weight:800;flex:none}.loan-record-actions{display:flex;gap:4px;flex:none;margin-left:auto}.loan-record-actions .ghost{font-size:10px;padding:5px 7px}.loan-record-note{font-size:11px;color:#777;margin:4px 0 0 0;padding-left:0}.loan-fold-marker{width:100%;margin:4px 0 2px;padding:6px 8px;border-radius:9px;background:#fafafa;border:1px dashed #ddd;color:#747474;font-size:11px;font-weight:700}.loan-fold-toggle{width:100%;margin-top:7px;padding:8px;border-radius:10px;background:#f5f5f7;color:#555;font-size:12px;font-weight:700}.loan-archive-list{display:grid;gap:8px}.loan-archive-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:13px;background:#fff}.loan-empty{font-size:12px;color:#777;padding:12px 2px}
+@media(max-width:380px){.loan-record-core{gap:5px}.loan-record-kind{font-size:12px}.loan-record-amt{font-size:13px}.loan-record-actions .ghost{padding:4px 6px}}
+/* step3: 整理モード選択 + ピンクテーマ */
+.loan-person-tab{background:#fff9fb;border-color:#ecdfe4;color:#685b60}.loan-person-tab.active{background:#f3e2ea;color:#9a4f6d;border-color:#ddb9c8}.loan-person-tab.archive{background:#fffdfd;border-color:#e7d6dd;color:#8a747c}.loan-select{width:19px;height:19px;accent-color:#b86b86;flex:none;margin:0 1px 0 0}.loan-organize-note{font-size:11px;color:#8a747c;margin:0 0 7px 0}.loan-record.organize .loan-record-main{align-items:center}.loan-record.selected{background:#fff6f9;border-radius:10px;padding-left:6px;padding-right:6px}.loan-fold-marker{background:#fff9fb;border-color:#ead7df;color:#846a74}.loan-fold-toggle{background:#f9eef2;color:#765a65}.ghost{background:#f8f1f4}.mini{background:#f8f2f5;border-color:#eadfe3}.mini.active{background:#f3e2ea;color:#9a4f6d;border-color:#ddb9c8}.choice.active{background:#b86b86;color:#fff;border-color:#b86b86}.optional{background:#fff9fb;border-color:#ead7df}.partner{background:#fffafd;border-color:#eadce3}.partner-tint input{background:#fff7fb;border-color:#ead5df}.partner-tint label{color:#9a5b75!important}.pill{background:#f9e9f0;color:#9a4f6d}.progress>div{background:#c9819c}.inline-setting{color:#a45373}.eventcard{background:linear-gradient(135deg,#fff0f5,#fff8fb)}
+
+/* step4: たたむ境界を細線化 + 編集/削除をサブスク相当まで小型化 */
+.loan-fold-marker{
+  width:100%;margin:2px 0;padding:4px 0;border:0;border-radius:0;background:transparent;
+  color:#8a747c;font-size:10px;font-weight:700;display:flex;align-items:center;gap:7px;
+}
+.loan-fold-marker::before,.loan-fold-marker::after{content:"";height:1px;background:#ead7df;flex:1}
+.loan-fold-marker:hover{background:transparent}
+.loan-record-actions .ghost,.history-actions .ghost{font-size:11px;padding:6px 8px;border-radius:10px}
+.history-actions{display:flex;gap:5px;margin-top:5px}
+
+/* step5: 自動折りたたみ + 履歴レイアウト整理 */
+.loan-record-body{min-width:0;flex:1}.loan-record-top{display:flex;justify-content:space-between;gap:10px;align-items:baseline}.loan-record-top .loan-record-kind{font-size:14px;font-weight:700}.loan-record-top .loan-record-amt{font-size:14px;font-weight:800;white-space:nowrap}.loan-record-sub{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:4px}.loan-record-meta{font-size:11px;color:var(--muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.loan-record-note{font-size:11px;color:#777;margin-top:4px;line-height:1.35}.history-item-main{display:flex;justify-content:space-between;gap:10px;align-items:baseline}.history-item-title{font-size:14px;font-weight:800}.history-item-amt{font-size:14px;font-weight:800;white-space:nowrap}.history-item-sub{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-top:4px}.history-item-left{min-width:0;flex:1}.history-item-meta{font-size:11px;color:var(--muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.history-item-note{font-size:11px;color:#777;margin-top:4px;line-height:1.4;overflow-wrap:anywhere}.history-actions{display:flex;gap:5px;flex:none;margin:0}
+/* Step9.3: 記録履歴の補足情報は最大2行。メモは下段に独立表示 */
+.history-item-sub{align-items:flex-start}
+.history-item-meta{flex:1;white-space:normal;overflow:hidden;text-overflow:clip;line-height:1.4;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow-wrap:anywhere}.loan-fold-toggle{width:100%;margin-top:7px;padding:7px 8px;border-radius:10px;background:#f9eef2;color:#765a65;font-size:11px;font-weight:700}
+
+/* step6: 貸し借りカード式 + 履歴フィルタ折りたたみ + 特別費配色調整 */
+.loan-person-tabs{margin-bottom:6px}
+.loan-person-card{padding:0;overflow:hidden;background:#fff;border-color:#eadfe3}
+.loan-person-card + .loan-person-card{margin-top:10px}
+.loan-summary-head{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:13px 14px;background:#fff;text-align:left;border:0;color:inherit}
+.loan-summary-left{min-width:0}.loan-summary-name{font-size:15px;font-weight:800}.loan-summary-state{font-size:12px;color:#765a65;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.loan-summary-arrow{font-size:13px;color:#9a7180;flex:none}
+.loan-person-inner{border-top:1px solid #f0e5e9;padding:12px 14px 14px;background:#fffdfd}
+.loan-current-panel{background:#fff7fa;border:1px solid #efdfe6;border-radius:13px;padding:10px 11px;margin-bottom:10px}
+.loan-section-label{font-size:11px;font-weight:800;color:#9a5b75;letter-spacing:.02em;margin-bottom:4px}
+.loan-current-state{font-size:15px;font-weight:800;color:#43383c}
+.loan-history-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:10px 0 2px}
+.loan-history-title{font-size:12px;font-weight:800;color:#6e5f65}
+.loan-card-actions{margin-left:auto}
+.loan-person-card.collapsed .loan-person-inner{display:none}
+.loan-archive-block{margin-top:12px}
+.history-more-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:8px 0 4px}
+.history-more-btn{padding:7px 10px;border-radius:999px;border:1px solid #eadfe3;background:#fff9fb;color:#765a65;font-size:11px;font-weight:700}
+.history-filter-extra{margin-top:4px}
+.history-filter-status{font-size:10px;color:#9a5b75;font-weight:700}
+/* 特別費は白ベース、ピンクはアクセントだけ */
+.eventcard{background:#fff;border-color:#eadfe3}
+.eventcard .event-detail{background:#fffdfd;border-radius:0 0 14px 14px}
+
+/* Step6 修正版2: ピンクの二重枠をなくし、長い相手名でも自然な縦並びに */
+.loan-person-card{padding:0;overflow:hidden}
+.loan-summary-row{display:block;background:#fff}
+.loan-summary-head{display:flex;align-items:center;justify-content:space-between;gap:14px;width:100%;min-width:0;min-height:76px;padding:15px 16px;background:transparent;border:0;border-radius:0;color:inherit;text-align:left}
+.loan-summary-left{display:flex;flex-direction:column;align-items:flex-start;gap:5px;flex:1;min-width:0}
+.loan-summary-head .loan-summary-name{display:block;width:100%;font-size:16px;font-weight:800;line-height:1.3;overflow-wrap:anywhere}
+.loan-summary-head .loan-current-state{display:block;font-size:14px;font-weight:700;line-height:1.4;color:#795965;overflow-wrap:anywhere}
+.loan-summary-arrow{flex:none;color:#997080;font-size:14px}
+.loan-person-inner{border-top:1px solid #f0e5e9;padding:10px 14px 14px;background:#fff}
+
+/* Step6 修正版3: アーカイブ閲覧／選択表示改善 */
+.loan-person-tab.archive.active{background:#a65f7c;color:#fff;border:1px solid #a65f7c;border-style:solid;font-weight:800;box-shadow:0 2px 5px rgba(130,65,90,.16)}
+.loan-person-tab.archive.active:focus-visible,.loan-summary-head:focus-visible,.loan-restore:focus-visible{outline:2px solid #9b5672;outline-offset:2px}
+.loan-person-card.is-archived .loan-summary-row{display:flex;align-items:center;gap:0}
+.loan-person-card.is-archived .loan-summary-head{flex:1;min-width:0;padding-right:7px}
+.loan-person-card.is-archived .loan-summary-left{gap:4px}
+.loan-person-card.is-archived .loan-summary-arrow{margin-left:6px}
+.loan-restore{flex:none;margin-right:12px;padding:9px 10px;border-radius:11px;background:#f8f1f4;color:#493d43;font-weight:700;font-size:12px;white-space:nowrap}
+.loan-person-card.is-archived .loan-person-inner{background:#fff}
+/* 修正版5：記録外の貸し借り追加（既存のカードレイアウトを維持） */
+.loan-extra-person{margin:3px 0 9px;font-size:12px;font-weight:700;color:#855e6d}
+.loan-extra-choices{display:flex;gap:8px;margin-top:5px}
+.loan-extra-choices .choice{flex:1;min-width:0}
+.loan-extra-hint{margin:10px 0 12px;color:#85757c;font-size:11px;line-height:1.6}
+.loan-record-note{overflow-wrap:anywhere}
+.loan-record-top .loan-record-kind{overflow-wrap:anywhere}
+@media(max-width:380px){.loan-card-actions{gap:4px}.loan-card-actions .ghost{padding:6px 7px;font-size:11px}}
+/* 修正版6：貸し借り履歴の登録日／メモ間の余白を4pxだけ縮小 */
+.loan-record-note{margin-top:0}
+/* 修正版4：整理モード中のみ、ボタン以外の行全体で選択できる */
+.loan-record.organize{cursor:pointer;touch-action:manipulation}
+.loan-record.organize:active{background:#fff0f5}
+.loan-record.organize.selected{background:#fff0f6}
+
+/* Step7：グループ化・清算調整を通常の履歴レイアウトと調和させる */
+.loan-organize-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:7px 0 8px}
+.loan-organize-actions .ghost{font-size:11px;padding:7px 9px}
+.loan-organize-actions .loan-organize-note{flex:1;margin:0}
+.loan-group{border:1px solid #e9dce2;border-radius:13px;margin:10px 0;overflow:hidden;background:#fffafb}
+.loan-group-summary{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;background:transparent;padding:10px;text-align:left;color:inherit}
+.loan-group-summary-title{font-size:12px;font-weight:800;color:#66535b}
+.loan-group-summary-sub{font-size:11px;color:#8e7180;margin-top:3px}
+.loan-group-summary-arrow{color:#987381;font-size:12px}
+.loan-group-detail{padding:0 10px 10px;border-top:1px solid #f1e5e9}
+.loan-group-detail .loan-record{padding:9px 0}
+.loan-group-actions{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;margin:8px 0 2px}
+.loan-group-actions .ghost{font-size:11px;padding:6px 8px}
+.loan-archive-groups{margin-top:10px;padding-top:10px;border-top:1px dashed #e9dce2}
+.loan-archive-groups-title{font-size:11px;color:#8b7180;font-weight:800;margin-bottom:7px}
+.loan-adjustment .loan-record-kind{color:#805e6c}
+.loan-adjustment .loan-record-amt{font-size:13px}
+.loan-person-settle-note{font-size:11px;color:#8a747c;margin:3px 0 8px}
+@media(max-width:380px){.loan-group-actions .ghost{font-size:10px;padding:6px}.loan-organize-actions .ghost{font-size:10px;padding:6px 8px}}
+.loan-group-restore{display:flex;justify-content:flex-end;padding:0 10px 10px}
+.loan-group-restore .ghost{font-size:11px;padding:6px 9px}
+.loan-group-lock-note{font-size:10px;color:#8e7180;margin:7px 0 2px}
+
+/* Step8: 全ての円額入力は¥ + 桁区切り。大きさを維持しつつ太字を控えめに */
+.money-input.mk-money-input{border:2px solid #cdbac4;border-radius:12px;min-height:46px;background:#fff;display:flex;align-items:center;overflow:hidden}
+.money-input.mk-money-input:focus-within{border-color:#b86b86;box-shadow:0 0 0 2px rgba(184,107,134,.12)}
+.money-input.mk-money-input .money-prefix{font-size:17px;font-weight:600;color:#6b5660;padding-left:12px}
+.money-input.mk-money-input input{font-size:17px!important;font-weight:500!important;min-width:0;flex:1;font-variant-numeric:tabular-nums}
+.mk-money-prompt-hint{font-size:11px;color:#877780;line-height:1.5;margin-top:5px}
+/* Step8 安定版：相手候補は入力幅内で横一列・横スクロール、選択中のみ太字 */
+.person-candidates{display:flex;flex-wrap:nowrap;gap:0;overflow-x:auto;overflow-y:hidden;width:100%;max-width:100%;min-width:0;white-space:nowrap;margin-top:5px;padding:2px 0 4px;scrollbar-width:none;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch}
+.person-candidates::-webkit-scrollbar{display:none}
+.person-candidate{flex:0 0 auto;white-space:nowrap;min-width:0;border:0;border-radius:0;background:transparent;color:#786a70;font-weight:400;font-size:11px;line-height:1.35;padding:5px 8px 5px 0}
+.person-candidate:not(:first-child)::before{content:'│';color:#c8b9c0;font-weight:400;padding-right:8px}
+.person-candidate.active{font-weight:800;color:#514047}
+.person-candidate:focus-visible{outline:2px solid #b86b86;outline-offset:-2px;border-radius:4px}
+/* 通常欄の色は維持、相手の分の¥部分だけ白くならないようにする */
+.partner-tint .money-input.mk-money-input{background:#fff7fb;border-color:#ead5df}
+.partner-tint .money-input.mk-money-input input{background:transparent!important}
+
+/* Step9: 貸し借りの視認性・グループ追加入力・記録画面の縦リズム */
+.loan-record-amt.loan-amt-positive{color:#b85f79}
+.loan-record-amt.loan-amt-negative{color:#526fae}
+.loan-summary-side{flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;padding:9px 12px 9px 3px}
+.loan-card-archive{padding:5px 8px;border-radius:9px;background:#f8f1f4;color:#80616d;font-size:10px;font-weight:700;white-space:nowrap}
+.loan-card-arrow{padding:1px 5px;background:transparent;color:#997080;font-size:14px;line-height:1}
+.loan-person-card:not(.is-archived) .loan-summary-row{display:flex;align-items:stretch}
+.loan-person-card:not(.is-archived) .loan-summary-head{padding-right:6px;flex:1;min-width:0}
+.loan-person-card:not(.is-archived) .loan-summary-arrow{display:none}
+.loan-group-add-note{font-size:11px;color:#8a747c;margin:5px 0 7px}
+.loan-group-add-actions{display:flex;align-items:center;gap:6px;padding:7px 0 8px}
+.loan-group-add-actions .loan-organize-note{flex:1;margin:0}
+.loan-group-add-actions .ghost{font-size:11px;padding:7px 9px}
+.record-top-grid{align-items:start}
+.record-top-grid>.field>input,.record-top-grid>.field>.money-input{height:58px;min-height:58px}
+.record-person-candidates{margin:0 0 7px calc(50% + 5px);width:calc(50% - 5px);max-width:calc(50% - 5px);padding:0 0 2px;gap:0}
+.record-person-candidates .person-candidate{font-size:10.5px;padding:3px 5px 3px 0}
+.record-person-candidates .person-candidate:not(:first-child)::before{padding-right:5px}
+#lendBox>.field:first-child{margin-top:7px}
+#lendBox .lend-amount-grid .field{margin-top:7px}
+@media(max-width:360px){.record-person-candidates{margin-left:calc(46% + 4px);width:calc(54% - 4px);max-width:calc(54% - 4px)}.loan-summary-side{padding-right:9px}.loan-card-archive{font-size:9.5px;padding:5px 6px}}
+
+
+/* Step9.1：やりとり入力を「日付｜相手 → 金額」に統一 */
+.record-top-grid.loan-person-layout{grid-template-columns:minmax(0,2fr) minmax(0,3fr);column-gap:9px;row-gap:0;align-items:start}
+.record-top-grid.loan-person-layout>.field{margin:7px 0 0}
+.record-top-grid.loan-person-layout .record-person-candidates{grid-column:2;margin:2px 0 1px;width:100%;max-width:100%;padding:0;gap:0}
+.record-top-grid.loan-person-layout .record-person-candidates .person-candidate{font-size:10.5px;padding:2px 3px 2px 0}
+.record-top-grid.loan-person-layout .record-person-candidates .person-candidate:not(:first-child)::before{padding-right:3px}
+.record-top-grid.loan-person-layout #normalAmount{grid-column:1/-1;margin-top:7px}
+@media(max-width:360px){.record-top-grid.loan-person-layout{grid-template-columns:minmax(0,2fr) minmax(0,3fr);gap:0 7px}.record-top-grid.loan-person-layout .record-person-candidates{margin-left:0;width:100%;max-width:100%}}
+
+
+/* Step9.2：記録画面の入力枠だけをStep8相当のすっきりした高さへ統一。
+   ボタン類とフィールド間の余白は変更しない。 */
+#record input:not([type="checkbox"]):not([type="radio"]),
+#record select,
+#record .picker{
+  min-height:46px;
+  height:46px;
+  padding-top:9px;
+  padding-bottom:9px;
+}
+#record .money-input,
+#record .money-input.mk-money-input{
+  height:46px!important;
+  min-height:46px!important;
+}
+#record .money-input input,
+#record .money-input.mk-money-input input{
+  height:42px!important;
+  min-height:0!important;
+  padding-top:8px!important;
+  padding-bottom:8px!important;
+}
+/* Step9で付いた58px指定を打ち消し、高さだけ整える。fieldのmarginは維持。 */
+#record .record-top-grid>.field>input,
+#record .record-top-grid>.field>.money-input{
+  height:46px!important;
+  min-height:46px!important;
+}
+/* やりとりは日付が必ず見切れない幅を確保しつつ、相手側をやや広めに。 */
+#record .record-top-grid.loan-person-layout{
+  grid-template-columns:minmax(145px,45fr) minmax(0,55fr);
+}
+@media(max-width:360px){
+  #record .record-top-grid.loan-person-layout{
+    grid-template-columns:minmax(142px,46fr) minmax(0,54fr);
+  }
+}
+
+
+/* Step9.5: 履歴の編集・削除を各記録の右下に固定 */
+.history-item-sub{align-items:stretch}
+.history-actions{align-self:flex-end;margin:0;flex:none}
+
+/* Analytics and bottom navigation additions */
+.bottom .nav{font-family:Arial,"Noto Sans JP",sans-serif;font-weight:650;letter-spacing:0} .bottom .nav-icon{display:block;height:25px;margin-bottom:3px;color:#444348}.bottom .nav-icon svg{height:24px;width:24px}.bottom .nav.active .nav-icon{color:#bf477a}.analysis-donut{height:176px;width:176px;border-radius:50%;margin:16px auto;display:grid;place-items:center}.analysis-donut>div{width:105px;height:105px;background:#fff;border-radius:50%}.analysis-dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:7px}.analysis-bar-row{display:grid;grid-template-columns:65px 1fr auto;gap:8px;align-items:center;margin:9px 0;font-size:12px}.analysis-bar-row strong{font-size:12px}.analysis-bar-track{height:9px;background:#f5eaf0;border-radius:20px;overflow:hidden}.analysis-bar-track i{display:block;height:100%;background:#d77fa3;border-radius:20px}.analysis-trend-category{padding:10px 0;border-top:1px solid #f0e5e9}
+/* Simplified analysis dashboard and opt-in historical trends */
+.mk-analysis .card{background:#fff;border-radius:22px;padding:20px;margin-bottom:14px}.mk-analysis .mid{margin-bottom:12px}.mk-finance-pair{display:grid;grid-template-columns:1fr 1fr;gap:10px}.mk-finance-tile{padding:16px;border-radius:15px;background:#f6f4f5;display:flex;flex-direction:column;gap:10px}.mk-finance-tile.pink{background:#fff0f5}.mk-finance-tile span{color:#80747a;font-size:13px}.mk-finance-tile strong{font-size:21px;color:#218b78}.mk-finance-tile.pink strong{color:#b8557d}.mk-net{margin-top:15px;padding-top:15px;border-top:1px solid var(--line)}.mk-total-budget{font-size:26px;font-weight:800;margin:8px 0 16px}.mk-trend-action{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin-top:12px}.mk-category-row{padding:14px 0;border-bottom:1px solid var(--line)}.mk-category-row:last-child{border-bottom:0}.mk-category-row .progress{margin:9px 0 6px}.mk-over-budget{color:#b94450;font-weight:700}.mk-trend-overlay{position:fixed;inset:0;z-index:999;background:#fff8fb;overflow:auto;padding:18px 12px 30px}.mk-trend-overlay.hidden{display:none}.mk-trend-panel{max-width:650px;margin:auto;background:white;border:1px solid var(--line);border-radius:22px;padding:17px}.mk-trend-chart{overflow-x:auto;overscroll-behavior-x:contain;padding:22px 0 10px}.mk-trend-plot{display:flex;align-items:flex-end;gap:9px;width:max-content;min-height:255px;border-bottom:1px solid #d6c8ce;padding:0 8px}.mk-trend-column{border:0;background:transparent;padding:0;display:flex;align-items:center;flex-direction:column;justify-content:flex-end;gap:7px;width:48px;color:#40353b;cursor:pointer}.mk-trend-bar{display:block;width:33px;min-height:2px;border-radius:10px 10px 0 0;background:#f4b6ce}.mk-trend-column.selected .mk-trend-bar{background:#d85c90}.mk-trend-amount{font-size:10px;white-space:nowrap;font-weight:700}.mk-trend-month{font-size:11px;white-space:nowrap}.mk-trend-history{max-height:310px;overflow-y:auto;overscroll-behavior:contain}.mk-trend-history-row{padding:12px 2px;border-bottom:1px solid var(--line)}
+
+.mk-trend-history-meta{display:flex;flex-direction:column;gap:4px}.mk-trend-history-meta small{color:#82777c;font-size:11px}
+
+.mk-budget-card .mid,.mk-categories-card .mid{margin-bottom:10px}
+.mk-budget-line{min-height:38px}
+.mk-budget-line>span{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.mk-budget-line strong{font-weight:750}
+.mk-budget-progress{margin:8px 0 9px}
+.mk-category-row{padding:12px 0}
+.mk-category-top{gap:6px}
+.mk-category-top>strong{min-width:0;overflow-wrap:anywhere}
+.mk-category-spend{display:flex;align-items:center;gap:6px;white-space:nowrap}
+.mk-category-muted{font-size:11px;color:var(--muted)}
+.mk-category-action{padding:5px 8px;font-size:11px;white-space:nowrap}
+.mk-category-progress{margin:8px 0 6px!important}
+.mk-category-bottom{font-size:12px;color:var(--muted);gap:6px;min-height:26px}
+.mk-category-budget{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+
+/* Refinements agreed after mobile screenshots */
+.mk-budget-card .mk-budget-line{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;min-height:43px}
+.mk-budget-card .mk-budget-line>span{min-width:0;display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;font-size:14px}
+.mk-budget-card .mk-budget-line strong{font-size:15px}
+.mk-budget-card .mk-budget-line button{justify-self:end;min-width:52px;margin:2px 0}
+.mk-budget-card .mk-unset{font-size:12px!important;font-weight:500!important;color:#8a7f84}
+.mk-budget-card>.row:last-child{align-items:center;gap:10px}
+.mk-budget-card>.row:last-child strong{font-size:16px}
+.mk-categories-card .mk-category-row{padding:11px 0}
+.mk-categories-card .mk-category-top{align-items:center}
+.mk-categories-card .mk-category-top>strong{font-size:14px}
+.mk-categories-card .mk-category-spend{gap:5px}
+.mk-categories-card .mk-category-spend>strong{font-size:14px}
+.mk-categories-card .mk-category-bottom{font-size:12px;margin-top:3px}
+.mk-categories-card .mk-category-action{font-size:11px;padding:5px 8px;flex:none}
+@media(max-width:370px){
+ .mk-categories-card .mk-category-top{flex-wrap:wrap}
+ .mk-categories-card .mk-category-spend{margin-left:auto}
+}
+
+/* Compact monthly income/expense summary, leaving other cards untouched */
+.mk-analysis .card:has(.mk-finance-pair){padding:15px 18px 13px}
+.mk-analysis .card:has(.mk-finance-pair) .mid{margin-bottom:9px}
+.mk-finance-pair{gap:9px}
+.mk-finance-tile{padding:11px 13px;gap:5px;border-radius:14px}
+.mk-finance-tile strong{font-size:20px}
+.mk-net{margin-top:10px;padding-top:10px}
+.bottom .nav-icon{height:25px}
+.bottom .nav-icon svg{width:24px;height:24px}
+
+/* Budget editor is confined to the visible viewport; only the sheet scrolls. */
+#moneyPromptModal{overscroll-behavior:contain;touch-action:none}
+#moneyPromptModal .sheet{max-height:100%;overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y;-webkit-overflow-scrolling:touch}
+
+/* Inline category budget editor: no overlay or background scroll locking. */
+.mk-inline-budget{margin-top:10px;padding:12px;border:1px solid #eadde2;border-radius:12px;background:#fffafc;display:flex;flex-direction:column;gap:8px}
+.mk-inline-budget label{font-size:13px;font-weight:600}
+.mk-inline-budget-field{display:flex;align-items:center;gap:8px;background:white;border:1px solid #dfd9de;border-radius:10px;padding:7px 12px}
+.mk-inline-budget-field span{font-weight:600;color:#777}
+.mk-inline-budget-field input{min-width:0;width:100%;border:0!important;background:transparent!important;box-shadow:none!important;font-size:18px;padding:4px 0!important;outline:none}
+.mk-inline-budget-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mk-inline-budget-actions button{min-height:40px}
+
+/* Monthly analysis refresh (2026-10-16): matching compact tiles */
+.mk-analysis .mk-summary-card .mk-finance-tile strong,
+.mk-analysis .mk-budget-card .mk-finance-tile strong{color:#494148;font-size:20px;font-weight:800;line-height:1.3;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.mk-analysis .mk-budget-card{padding:15px 18px 13px}
+.mk-analysis .mk-budget-card .mid{margin-bottom:9px}
+.mk-analysis .mk-budget-tiles .mk-finance-tile{min-width:0;gap:6px}
+.mk-analysis .mk-tile-head{display:flex;align-items:center;justify-content:space-between;gap:3px;min-width:0}
+.mk-analysis .mk-tile-head span{font-size:12px;white-space:nowrap}
+.mk-analysis .mk-tile-head button{flex:none;font-size:10px;padding:5px 6px;min-width:0;line-height:1.2}
+.mk-analysis .mk-budget-card .mk-unset{font-size:12px!important;font-weight:500!important;color:#8a7f84!important}
+.mk-analysis .mk-budget-remain{display:flex;justify-content:flex-end;align-items:baseline;gap:8px;font-size:13px}
+.mk-analysis .mk-budget-remain strong{font-size:16px}
+.mk-analysis .mk-negative{color:#c14354!important}
+.mk-inline-budget-entry{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:stretch;gap:8px}
+.mk-inline-budget-entry .mk-inline-budget-field{min-width:0}
+.mk-inline-budget-confirm{min-height:40px;min-width:68px;padding:8px 13px;border-radius:10px;font-weight:750;white-space:nowrap}
+.mk-inline-budget-field input{caret-color:#70515f}
+@media(max-width:360px){.mk-analysis .mk-finance-tile{padding:10px}.mk-analysis .mk-tile-head span{font-size:11px}.mk-analysis .mk-tile-head button{padding:4px 5px}}
+
+/* 2026-10-16: Consistent action-button palette (visual-only update). */
+/* Primary actions: replace the previous charcoal background. */
+.btn{background:#c67596;color:#fff}
+.btn:hover{background:#b96789}
+.btn:active{background:#a9587b}
+/* Inline budget confirmation stays gentle and visually distinct. */
+.mk-inline-budget-confirm{background:#fce8f0;color:#9d315d;border:1px solid #f4d6e2}
+.mk-inline-budget-confirm:hover{background:#f8dbe7}
+/* Controls inside tinted monthly summary tiles need a visible outline. */
+.mk-analysis .mk-budget-tiles .mk-tile-head button{
+  background:#fff;
+  border:1px solid #c98ba4;
+  color:#8f4868;
+  border-radius:9px;
+  font-weight:700;
+}
+.mk-analysis .mk-budget-tiles .mk-tile-head button:focus-visible,
+.btn:focus-visible,.mk-inline-budget-confirm:focus-visible{
+  outline:2px solid #a95477;outline-offset:2px;
+}
+
+/* Loan actions: separate add/organize from edit/delete and archive. */
+.loan-card-actions .loan-action-primary{background:#f4dfe9;color:#9b4e72;border:1px solid #e9c6d7;font-weight:750}
+.loan-card-actions .loan-action-primary:hover{background:#edd0df}
+.loan-card-archive,.loan-restore{background:#f1edf3!important;color:#77697e!important;border:1px solid #ded5e2!important}
+
+/* Compact home TODO */
+.mk-todo-card{height:auto!important;min-height:0!important}.mk-todo-count{font-size:12px;color:#8b7b85;font-weight:500}.mk-todo-row{display:flex;align-items:center;border-bottom:1px solid rgba(120,110,120,.12);min-height:41px}.mk-todo-link{flex:1;display:flex;align-items:center;gap:7px;border:0;background:transparent;color:inherit;text-align:left;padding:9px 0;min-width:0;font-size:13px}.mk-todo-title{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.mk-todo-date{font-size:11px;color:#8b7b85;white-space:nowrap}.mk-todo-options{border:0;background:transparent;color:#9b7889;padding:7px 4px;font-size:18px}.mk-todo-more{display:block;width:100%;border:0;background:transparent;color:#9d6784;padding:10px 0 0;font-size:12px}.mk-todo-empty{padding:10px 0}.mk-loan-todo-btn{border:1px solid #e4c4d3;background:#fff6fa;color:#a05b7e;border-radius:7px;padding:5px 7px;font-size:11px;white-space:nowrap}
+
+/* TODO usability update */
+.mk-todo-heading{font-size:19px;font-weight:800;display:flex;align-items:center;gap:7px;white-space:nowrap}
+.mk-todo-heading-icon{font-size:19px;color:#bd7295;font-weight:500}.mk-todo-header{align-items:center}.mk-todo-count{font-size:12px;margin-top:3px}
+.mk-todo-row{min-height:52px;gap:8px}.mk-todo-check{width:19px;height:19px;accent-color:#bc7295;flex:none;margin:0 2px 0 0}
+.mk-todo-link{font-size:15px;padding:12px 0;min-width:0;gap:5px}.mk-todo-title{white-space:normal;line-height:1.4}.mk-todo-date{font-size:11px}
+.mk-todo-important .mk-todo-title{color:#a44d75;font-weight:750}.mk-todo-star{color:#b85d85}.mk-todo-detail{border:1px solid #e8dce2;background:#fff;border-radius:10px;color:#795965;padding:7px 9px;font-size:11px;white-space:nowrap;flex:none}
+.mk-todo-more[hidden],.mk-todo-overlay[hidden],.mk-todo-delete[hidden]{display:none!important}
+.mk-todo-overlay{position:fixed;inset:0;z-index:10000;background:#0006;display:flex;align-items:center;justify-content:center;padding:16px}
+.mk-todo-sheet{width:min(100%,460px);max-height:90vh;overflow:auto;background:#fff;border-radius:22px;padding:22px;box-shadow:0 12px 35px #0002}
+.mk-todo-sheet-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}.mk-todo-sheet-head h2{font-size:22px;margin:0}
+.mk-todo-label{display:block;color:#777;margin-bottom:8px}.mk-todo-title-input{width:100%;box-sizing:border-box;border:1px solid #ddd;border-radius:14px;padding:13px;font-size:16px}
+.mk-todo-setting-head{display:flex;align-items:center;justify-content:space-between;margin-top:24px;margin-bottom:14px}.mk-todo-emphasis{display:flex;align-items:center;gap:5px;font-size:15px}.mk-todo-emphasis input{accent-color:#bd7295;width:19px;height:19px}
+.mk-todo-date-row{display:flex;align-items:center;gap:12px;flex-wrap:nowrap}.mk-todo-no-date,.mk-todo-date-choice{display:flex;align-items:center;gap:5px;min-width:0;white-space:nowrap;font-size:14px}.mk-todo-date-row input[type=radio]{accent-color:#bd7295;width:18px;height:18px;flex:none}.mk-todo-date-choice{flex:1}.mk-todo-date-choice input[type=date]{min-width:0;width:100%;box-sizing:border-box;border:1px solid #ddd;border-radius:12px;padding:9px 5px;font-size:14px;background:#fff}
+.mk-todo-modal-actions{display:flex;gap:10px;margin-top:24px}.mk-todo-modal-actions .btn{flex:1}.mk-todo-delete{color:#b94242;border-color:#e5bfc7}
+.loan-person-card:not(.is-archived) .loan-summary-row{position:relative;align-items:center}.loan-person-card:not(.is-archived) .loan-summary-head{min-height:76px;padding-right:4px}
+.mk-loan-todo-btn{align-self:center;flex:none;padding:5px 7px;font-size:11px;line-height:1.3;min-height:27px;max-width:70px}
+@media(max-width:380px){.mk-todo-heading{font-size:17px}.mk-todo-date-row{gap:5px}.mk-todo-no-date,.mk-todo-date-choice{font-size:12px}.mk-todo-sheet{padding:17px}.mk-todo-date-choice input[type=date]{font-size:12px}}
+
+/* TODO final test refinements */
+.mk-todo-heading{gap:8px}.mk-todo-count{margin-top:0;font-size:12px;color:#8b7b85;font-weight:500}.mk-todo-check:disabled{opacity:.35;cursor:not-allowed}.mk-todo-section-toggle{display:block;width:100%;padding:11px 0 6px;background:transparent;border:0;text-align:left;color:#806c78;font-size:12px;font-weight:700}.mk-todo-archive-row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:7px 0;font-size:12px;color:#80757b}.mk-todo-archive-row label{display:flex;align-items:center;gap:8px}.mk-todo-archive-row input{width:18px;height:18px;accent-color:#b86b86}.mk-todo-archive-row .outline{font-size:11px;padding:5px 9px}.mk-todo-modal-actions{flex-wrap:wrap}.mk-todo-modal-actions #mkTodoSave{flex-basis:100%;order:-1;background:#b86b86}.mk-todo-modal-actions #mkTodoHide,.mk-todo-modal-actions #mkTodoDelete{flex:1}.mk-todo-modal-actions #mkTodoHide[hidden]{display:none!important}
+
+/* 2026-10-17: confirmed compact actions, no other form layout changes */
+.mk-todo-modal-actions #mkTodoDelete{flex:2 1 0;min-width:0}
+.mk-todo-modal-actions #mkTodoHide{flex:3 1 0;min-width:0;white-space:nowrap;padding-left:3px;padding-right:3px}
+.mk-todo-modal-actions #mkTodoSave{flex:5 1 0;min-width:0}
+.mk-todo-modal-actions{gap:6px}
+.loan-person-card:not(.is-archived) .loan-summary-row{display:flex;align-items:center}
+.mk-loan-summary-actions{display:flex;align-items:center;gap:5px;flex:none;margin-left:auto}
+.mk-loan-summary-actions .mk-loan-todo-btn,.mk-loan-summary-actions .loan-card-archive{box-sizing:border-box;height:29px;min-height:29px;max-width:none;align-self:center;display:inline-flex;align-items:center;justify-content:center;line-height:1.1;font-size:10px;padding:5px 7px;border-radius:9px;white-space:nowrap}
+.mk-loan-summary-actions .mk-loan-todo-btn{background:#fbedf2;color:#a45272;border:1px solid #e7b9c9}
+.mk-loan-summary-actions .mk-loan-todo-btn.mk-loan-todo-active{background:#f1f0f4;color:#77717d;border:1px solid #ded9e1}
+.mk-loan-summary-actions .loan-card-archive{background:#fff!important;color:#77717d!important;border:1px solid #ddd7dc!important}
+.loan-person-card:not(.is-archived) .loan-summary-side{padding-left:2px;padding-right:9px;gap:0}
+@media(max-width:380px){.mk-loan-summary-actions{gap:3px}.mk-loan-summary-actions .mk-loan-todo-btn,.mk-loan-summary-actions .loan-card-archive{font-size:9px;padding:5px}}
+
+/* 2026-10-17: final single-row TODO actions; overrides previous full-width save */
+.mk-todo-modal-actions{display:flex!important;flex-wrap:nowrap!important;gap:6px;align-items:stretch}
+.mk-todo-modal-actions #mkTodoDelete{order:0!important;flex:2 1 0!important;font-size:12px!important;padding:10px 2px;min-width:0}
+.mk-todo-modal-actions #mkTodoHide{order:1!important;flex:3 1 0!important;font-size:12px!important;padding:10px 2px;min-width:0;white-space:nowrap}
+.mk-todo-modal-actions #mkTodoSave{order:2!important;flex:5 1 0!important;flex-basis:0!important;width:auto!important;min-width:0;font-size:15px!important}
+.mk-rakpay-source{margin-top:9px;padding:10px;border:1px solid #eadfe3;border-radius:12px;background:#fff9fb}
+.mk-rakpay-source .small{margin-bottom:6px}.mk-rakpay-source .mini{flex:1;min-width:0}
+
+.mk-category-link{border:0;background:transparent;color:inherit;font:inherit;font-weight:700;cursor:pointer;padding:3px 2px;text-decoration:underline;text-decoration-color:rgba(120,120,120,.35);text-underline-offset:3px}
+
+/* Compact record editor: presentation only; preserve existing form field IDs. */
+#editBody .mk-edit-pair{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;align-items:end;margin-bottom:10px}
+#editBody .mk-edit-pair .field{min-width:0;margin:0}
+#editBody .mk-edit-pair input,#editBody .mk-edit-pair select{min-width:0;width:100%;box-sizing:border-box;text-overflow:ellipsis}
+#editBody .mk-edit-details{border:1px solid #eadfe4;border-radius:15px;background:#fcf3f6;padding:12px;margin:10px 0}
+#editBody .mk-edit-details summary{font-weight:750;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}
+#editBody .mk-edit-details summary::after{content:'＋';font-size:21px;line-height:1;font-weight:500}
+#editBody .mk-edit-details[open] summary::after{content:'－'}
+#editBody .mk-edit-detail-hint{font-size:12px;color:#857a80;margin:5px 0 9px;overflow-wrap:anywhere}
+#editBody .mk-edit-details .mk-edit-pair{margin-top:8px}
+#editBody .mk-edit-details .field{margin:8px 0 0}
+@media(max-width:370px){#editBody .mk-edit-pair{gap:7px}}
+
+/* Compact edit modal: record type uses the existing muted pink palette. */
+.mk-edit-kind{color:#bc718e;font-size:.78em;font-weight:750;white-space:nowrap}
+#editModal .sheet .row{gap:8px}
+#editModal .sheet-title{min-width:0;white-space:nowrap;font-size:clamp(17px,4.5vw,21px)}
+#editBody .mk-edit-pair .field{min-width:0}
+#editBody .mk-edit-pair input,#editBody .mk-edit-pair select{max-width:100%;text-overflow:ellipsis}
+
+/* Next test build: history reset, compact sticky month and bill action */
+#histTypeBtns{align-items:center}
+.mk-hist-reset{margin-left:auto;padding:7px 9px;border:1px solid #d5a2b7;border-radius:11px;background:#fff8fb;color:#a65e7d;font-size:11px;font-weight:750;white-space:nowrap}
+.mk-hist-reset.is-inactive{opacity:.42;cursor:default}
+#mkMonthSentinel{height:0;pointer-events:none}
+#budget .mk-month-sticky{position:sticky;top:0;z-index:24;background:rgba(255,253,253,.98);box-shadow:0 2px 6px rgba(60,30,45,.03);}
+
+.mk-card-heading{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.mk-card-heading .item-title{min-width:0}
+.mk-bill-check{flex:none;padding:10px 12px;min-height:40px;background:#fff;border:1px solid #dca8bd;border-radius:11px;color:#a75d7b;font-size:12px;font-weight:750;white-space:nowrap;line-height:1.25;transform:translateY(7px)}
+
+/* Edit screen: delete action in header, cancel and save at bottom. */
+#editModal .mk-edit-delete{flex:none;background:#fff8f8;border:1px solid #e9c3ca;color:#b44d66;border-radius:10px;padding:9px 12px;font-size:13px;font-weight:700;min-height:38px}
+
+/* Recent records: float the action beside details rather than adding a separate row. */
+.mk-recent-heading{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.mk-recent-heading .item-title{min-width:0;overflow-wrap:anywhere}
+.mk-recent-heading strong{flex:none;white-space:nowrap}
+.mk-recent-detail{display:flow-root;margin-top:4px;min-height:36px}
+.mk-recent-detail .item-meta{margin-top:0;overflow-wrap:anywhere}
+.mk-recent-edit{float:right;margin:0 0 2px 9px;min-height:32px;min-width:48px}
+/* Completed todo actions remain in one row, including long titles. */
+.mk-todo-archive-row label{flex:1;min-width:0;overflow-wrap:anywhere}
+.mk-todo-completed-delete{flex:none;background:#fff!important;border:1px solid #e7dfe3!important;color:#7b7074!important;font-weight:650}
+
+/* 2026-10-18: lighten only small secondary action labels; preserve their geometry and palette. */
+.mk-recent-edit,
+.history-actions .ghost,
+.loan-record-actions .ghost,
+.mk-todo-completed-delete,
+.mk-analysis .mk-budget-tiles .mk-tile-head button,
+.mk-analysis .mk-category-action,
+.rec-actions .ghost.sm {font-weight:400!important;}
+/* Pausing a recurring payment is a cautionary action, not deletion. */
+.rec-actions .mk-recurring-pause {color:#a65b67!important;}
+
+/* 2026-10-18: recent edit matches the compact history controls. */
+.mk-recent-edit{min-height:0;min-width:0;padding:6px 8px;font-size:11px}
+/* A quiet, optional reference total below the category list. */
+.mk-category-budget-sum{display:flex;align-items:center;justify-content:space-between;gap:8px;border-top:1px solid var(--line);margin-top:10px;padding-top:12px;color:var(--muted);font-size:12px}
+.mk-category-budget-sum strong{font-size:13px;color:var(--ink);font-weight:600;white-space:nowrap}
+/* Wishlist: compact actions, notes, and no overall price total. */
+.mk-wish-info{flex:1;min-width:0;overflow-wrap:anywhere}.mk-wish-item .row{align-items:flex-start}.mk-wish-item strong{white-space:nowrap}.mk-wish-memo{white-space:pre-wrap}.mk-wish-actions{display:flex;justify-content:flex-end;gap:6px;margin-top:7px}.mk-wish-actions .ghost{font-weight:400!important}
+
+/* 2026-10-18 follow-up: keep wishlist inputs consistent with the app palette. */
+#wishlist input:focus,#wishlist textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px rgba(184,107,134,.13)}
+#wishlist .money-input.mk-money-input:focus-within{border-color:var(--accent);box-shadow:0 0 0 2px rgba(184,107,134,.13)}
+#wishlist .money-input.mk-money-input input:focus{outline:none!important;box-shadow:none!important}
+/* Match the history action button, including its exact box sizing. */
+#recent .mk-recent-edit{padding:6px 8px!important;font-size:11px!important;min-height:0!important;min-width:0!important;line-height:normal!important;border-radius:10px!important;font-weight:400!important}
+
+/* Unified focus treatment: only active editable fields */
+input:focus,textarea:focus,select:focus,.money-input:focus-within{outline:none!important;border-color:#c77c9b!important;box-shadow:0 0 0 3px rgba(199,124,155,.17)!important}
+.money-input:focus-within input{box-shadow:none!important;border:0!important;outline:none!important}
+textarea{resize:none!important}
+.field input,.field select,.field textarea{box-sizing:border-box;max-width:100%;border-radius:13px}
+.field input:not([type=checkbox]),.field select{min-height:46px}
+.mk-money-input input{min-height:42px!important}
+
+
+/* Wishlist final: single card and shared add/edit popup. */
+.mk-wish-card .mk-wish-header{margin-bottom:6px;gap:12px}
+.mk-wish-card .mk-wish-header .mid{font-size:19px}
+.mk-wish-row{display:flex;width:100%;align-items:center;gap:10px;padding:17px 1px;border:0;border-bottom:1px solid var(--line);background:transparent;color:var(--ink);font:inherit;text-align:left;cursor:pointer}
+.mk-wish-row:last-child{border-bottom:0}
+.mk-wish-row:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:9px}
+.mk-wish-row .mk-wish-info{display:flex;flex:1;min-width:0;flex-direction:column;gap:4px}
+.mk-wish-name{font-size:15px;font-weight:750;overflow-wrap:anywhere}
+.mk-wish-row .mk-wish-memo{font-size:12px;color:var(--muted);font-weight:400;white-space:pre-wrap;overflow-wrap:anywhere}
+.mk-wish-price{font-size:15px;font-weight:700;white-space:nowrap}
+.mk-wish-chevron{font-size:24px;line-height:1;color:#ad9ba4;margin-left:2px}
+.mk-wish-empty{padding:15px 0 5px}
+.mk-wish-sheet{max-height:calc(100dvh - 45px);overflow-y:auto}
+.mk-wish-modal-head{gap:8px;margin-bottom:12px}
+.mk-wish-modal-head .sheet-title{min-width:0;font-size:20px}
+.mk-wish-delete{flex:none;color:#b14f69!important;border-color:#edc5d0!important;background:#fff7f9!important;padding:8px 13px;font-size:12px}
+.mk-wish-form-actions{margin-top:16px}
+.mk-wish-form-actions button{min-width:0}
+#wishModal textarea{resize:none}
+
+.mk-bill-nav{display:flex;justify-content:space-between;gap:8px;margin:12px 0}.mk-recurring-sheet{max-height:88dvh;overscroll-behavior:contain}.mk-recurring-actions{display:flex;gap:6px;margin-top:12px}.mk-recurring-actions>*{flex:1;min-width:0}.mk-recurring-actions .btn{width:auto}
+
+/* Mobile recurring editor: prevent inherited grid widths and flex shrink */
+#mkRecurringModal{inset:0;width:100%;max-width:100vw;align-items:flex-end;justify-content:center;overflow:hidden}
+#mkRecurringModal .mk-recurring-sheet{width:100%;max-width:520px;min-width:0;max-height:calc(100dvh - 24px);overflow-x:hidden;overflow-y:auto;padding:16px;box-sizing:border-box}
+#mkRecurringModal .row{min-width:0;gap:10px;align-items:flex-start}
+#mkRecurringModal .row>strong{flex:1;min-width:0;overflow-wrap:anywhere}
+#mkRecurringModal .row>button{flex:0 0 auto;white-space:nowrap}
+#mkRecurringModal .grid2{grid-template-columns:repeat(2,minmax(0,1fr))}
+#mkRecurringModal .field{min-width:0}
+#mkRecurringModal input,#mkRecurringModal select,#mkRecurringModal textarea{min-width:0;max-width:100%;width:100%}
+#mkRecurringModal .mk-recurring-actions{display:flex;flex-wrap:wrap}
+#mkRecurringModal .mk-recurring-actions>button{min-width:0;white-space:nowrap}
+.mk-bill-items{border-top:1px solid var(--line);margin-top:14px;padding-top:12px}
+.mk-bill-items summary{cursor:pointer;font-weight:800;font-size:14px;list-style-position:inside}
+.mk-bill-expand{float:right;font-size:11px;font-weight:500;color:var(--muted)}
+.mk-bill-items-content{padding-top:9px}
+.mk-bill-withdraw{display:flex;justify-content:flex-end;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px}
+.mk-bill-small{width:auto!important;padding:8px 12px;font-size:12px;white-space:nowrap}
+.mk-bill-withdraw button:disabled{opacity:.45;cursor:not-allowed}
+.mk-bill-note{margin-top:10px}
+.mk-bill-preview{background:#fffdfd}
+
+/* Recurring modal is mounted directly under body to avoid inherited page layout. */
+body > #mkRecurringModal {position:fixed!important;inset:0!important;width:100vw!important;max-width:none!important;display:flex!important;justify-content:center!important;align-items:flex-end!important;z-index:110!important;padding:0!important;}
+body > #mkRecurringModal.hidden {display:none!important;}
+body > #mkRecurringModal > .mk-recurring-sheet {flex:0 1 520px!important;width:100%!important;max-width:520px!important;min-width:0!important;max-height:calc(100dvh - 16px)!important;overflow-y:auto!important;overflow-x:hidden!important;margin:0!important;}
+.mk-bill-items summary {display:flex;align-items:center;justify-content:space-between;gap:10px;list-style:none;}
+.mk-bill-items summary::-webkit-details-marker {display:none;}
+.mk-bill-expand::after {content:'▼';font-size:13px;}
+.mk-bill-items[open] .mk-bill-expand::after {content:'▲';}
+
+/* v3: recurring editor uses the same independent bottom-sheet structure as wishlist. */
+body > #mkRecurringModal {position:fixed!important;inset:0!important;display:flex!important;align-items:flex-end!important;justify-content:center!important;width:100%!important;max-width:none!important;padding:0!important;z-index:120!important;background:rgba(0,0,0,.38)!important;}
+body > #mkRecurringModal.hidden {display:none!important;}
+body > #mkRecurringModal > .mk-recurring-sheet {box-sizing:border-box!important;flex:none!important;width:100%!important;max-width:520px!important;min-width:0!important;max-height:calc(100dvh - 20px)!important;margin:0!important;padding:18px 16px calc(20px + env(safe-area-inset-bottom))!important;overflow-y:auto!important;overflow-x:hidden!important;border-radius:22px 22px 0 0!important;background:var(--card)!important;}
+#mkRecurringModal .grid2 {grid-template-columns:repeat(2,minmax(0,1fr));}
+#mkRecurringModal .row > strong {font-size:18px;line-height:1.35;}
+#mkRecurringModal .row > button {background:#f8eef2;color:#493c42;}
+@media(max-width:360px){#mkRecurringModal .grid2{grid-template-columns:1fr;}}
+/* v3: bill details borrow the app's restrained rose/grey visual language. */
+#billModal .sheet {background:var(--card);border:1px solid var(--line);border-bottom:0;}
+#billModal .ghost {background:#f8eef2;color:#493c42;}
+#billModal .outline {border-color:var(--line);}
+#billModal .mk-bill-items {border-top:1px solid var(--line);}
+#billModal .mk-bill-items summary {display:flex;align-items:center;justify-content:flex-start;gap:5px;min-height:44px;color:var(--ink);font-size:14px;cursor:pointer;}
+#billModal .mk-bill-count {font-weight:600;color:var(--muted);}
+#billModal .mk-bill-expand {float:none;display:inline-flex;align-items:center;color:var(--muted);font-size:13px;}
+#billModal .mk-bill-expand::after {content:'▼';}
+#billModal .mk-bill-items[open] .mk-bill-expand::after {content:'▲';}
+
+/* 2026-10-19: 金額入力のフォーカス表示は外側の細い枠だけ。 */
+.money-input.mk-money-input {
+  border: 1px solid #dedfe4 !important;
+  border-radius: 13px;
+  box-shadow: none !important;
+}
+.money-input.mk-money-input:focus-within {
+  border-color: #c77c9b !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+.money-input.mk-money-input > input,
+.money-input.mk-money-input > input:focus {
+  border: 0 !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Category budget editor: the outer field already supplies the border.
+   Money formatter adds a nested wrapper; keep that wrapper visually neutral. */
+.mk-inline-budget-field .money-input.mk-money-input,
+.mk-inline-budget-field .money-input.mk-money-input:focus-within {
+  flex: 1 1 auto; min-width: 0; width: auto; min-height: 0;
+  border: 0 !important; border-radius: 0 !important;
+  box-shadow: none !important; outline: none !important;
+  background: transparent !important; overflow: visible;
+}
+.mk-inline-budget-field .money-input.mk-money-input .money-prefix { display: none !important; }
+.mk-inline-budget-field .money-input.mk-money-input input,
+.mk-inline-budget-field .money-input.mk-money-input input:focus {
+  width: 100%; min-width: 0; padding: 4px 0 !important;
+  border: 0 !important; box-shadow: none !important; outline: none !important;
+}
+.mk-inline-budget-field:focus-within { border-color: #c77c9b; }
+
+/* #54: category-budget inline editor has ONE border on its outer field.
+   Override the global focus rule and the dynamically inserted money wrapper. */
+.mk-inline-budget-field,
+.mk-inline-budget-field:focus-within {
+  border:1px solid #dfd9de !important;
+  outline:none !important;
+  box-shadow:none !important;
+}
+.mk-inline-budget-field:focus-within {border-color:#c77c9b !important;}
+.mk-inline-budget-field .money-input.mk-money-input,
+.mk-inline-budget-field .money-input.mk-money-input:focus-within {
+  border:0 !important;outline:0 !important;box-shadow:none !important;
+  background:transparent !important;min-height:0 !important;
+  flex:1 1 auto;min-width:0;
+}
+.mk-inline-budget-field .money-input.mk-money-input > input,
+.mk-inline-budget-field .money-input.mk-money-input > input:focus {
+  border:0 !important;outline:0 !important;box-shadow:none !important;
+  background:transparent !important;
+}
+
+/* #55: Keep the limited-payment checkbox compact despite recurring input sizing. */
+#mkRecurringModal .switchline { display:flex; align-items:center; gap:10px; }
+#mkRecurringModal .switchline input[type="checkbox"] {
+  appearance:auto; -webkit-appearance:checkbox;
+  flex:0 0 18px; width:18px!important; min-width:18px; max-width:18px;
+  height:18px; margin:0; padding:0; border-radius:3px; accent-color:#bd7295;
+}
+
+/* Bill confirmation cancellation stays inside the existing reconciliation disclosure. */
+.mk-bill-cancel-confirm{margin-top:12px;padding-top:12px;border-top:1px solid var(--line,#e8e2e5)}
