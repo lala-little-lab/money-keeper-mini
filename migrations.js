@@ -1,6 +1,6 @@
 /* Mini business-data migration; encrypted envelope remains version 1. */
 const MKMigrations={
- currentVersion:2,
+ currentVersion:3,
  validateMemo(data){
  if(!data||!Array.isArray(data.groups)||!Array.isArray(data.words))throw Error('メモリストの形式が正しくありません。');
  const ids=new Set(),names=new Set();
@@ -19,12 +19,24 @@ const MKMigrations={
    data.mkMemoData={groups:[],words:[]};
   }
   this.validateMemo(data.mkMemoData);
+  if(data.mkEventFixed===undefined){
+   if(version>=3)throw Error('特別費の固定設定がありません。');
+   data.mkEventFixed={};
+  }
+  if(!data.mkEventFixed||typeof data.mkEventFixed!=='object'||Array.isArray(data.mkEventFixed)||Object.values(data.mkEventFixed).some(v=>typeof v!=='boolean'))throw Error('特別費の固定設定が正しくありません。');
+  if(Array.isArray(data.eventsData))for(const e of data.eventsData){
+   if(!e||typeof e!=='object')throw Error('特別費イベントの形式が正しくありません。');
+   if(e.selectedCats===undefined){
+    e.selectedCats=Object.keys(e.catBudgets||{});
+   }
+   if(!Array.isArray(e.selectedCats)||e.selectedCats.some(c=>typeof c!=='string'))throw Error('特別費のカテゴリ設定が正しくありません。');
+  }
   data.miniSchemaVersion=this.currentVersion;
   return data;
  },
  upgrade(envelope){
   if(!envelope||typeof envelope!=='object'||!Number.isInteger(envelope.schemaVersion))throw Error('Unversioned database');
-  if(envelope.schemaVersion!==1&&envelope.schemaVersion!==2)throw Error('Unsupported data version');
-  return {...envelope,schemaVersion:2,data:this.upgradeState(envelope.data)};
+  if(![1,2,3].includes(envelope.schemaVersion))throw Error('Unsupported data version');
+  return {...envelope,schemaVersion:3,data:this.upgradeState(envelope.data)};
  }
 };
