@@ -1002,9 +1002,6 @@ async function mkBoot(){
     mkStorageReady=false;
     alert('保存データを読み込めませんでした。安全のため、この画面では保存を停止しています。再読み込みして確認してください。');
   }
-  // Mini: NZ旅行 is a built-in selectable event; do not modify existing matching metadata.
-  if(!eventsData.some(e=>e.name==='NZ旅行'))eventsData.push({id:'mini-event-nz-trip',name:'NZ旅行',start:'',end:'',budget:0,catBudgets:{},archived:false,baseSpent:0});
-  deletedEventNames=deletedEventNames.filter(name=>name!=='NZ旅行');
   renderPayBtns();renderCharge();renderAll();updateForm();initMoneyInputs();mkDisplayPage('record',mkNavigationButton('record'));
   try{const last=lastRequestedPage;if(['record','history','budget','other','events','memoManager'].includes(last)&&$(last)?.classList.contains('page')){const navBtn=document.querySelector(`.nav[onclick*="'${last}'"]`);nav(last,navBtn||null);if(['loans','events','wish'].includes(last)){const otherNav=document.querySelectorAll('.nav')[5];if(otherNav)otherNav.classList.add('active')}}}catch(_){}
   mkMemoRender();
