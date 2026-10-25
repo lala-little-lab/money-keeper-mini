@@ -32,7 +32,9 @@ function mount(){
    const ok=confirm('現在のMiniデータをすべてバックアップの内容で置き換えます。現在のデータをバックアップ済みですか？ この操作は取り消せません。');
    if(!ok){status.textContent='復元をキャンセルしました。';return}
    // Replace only after successful authenticated decryption and user confirmation.
-   await MKStorage.save(state);
+   const wasReady=mkStorageReady;
+   mkStorageReady=false;
+   try{await MKStorage.save(state)}catch(error){mkStorageReady=wasReady;throw error}
    status.textContent='復元データを保存しました。画面を再読み込みします。';
    location.reload();
   }catch(e){status.textContent='復元失敗：ファイル・パスワード・形式を確認してください。 '+e.message}

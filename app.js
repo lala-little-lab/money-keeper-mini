@@ -75,6 +75,9 @@ function nav(id,b){
  mkDisplayPage(id,b);
 }
 window.addEventListener('popstate',function(event){
+ if(event.state?.memo){mkMemoOrigin=event.state.memo.origin||'other';mkMemoHide();mkMemoView=event.state.memo.view||'words';mkMemoScope=event.state.memo.scope||'';if(mkMemoView==='groups'&&mkMemoScope&&!mkMemoData.groups.some(g=>g.id===mkMemoScope))mkMemoScope='';mkMemoRender();mkDisplayPage('memoManager',mkNavigationButton('memoManager'));if(event.state.memo.modal)mkMemoHistory(true);return;}
+ if(document.querySelector('.page.active')?.id==='memoManager')mkMemoHide();
+
  const id=event.state&&event.state.mkPage;
  if(!id||!$(id)||!$(id).classList.contains('page'))return;
  // Do not silently discard a modal's draft on Back. Close it explicitly.
@@ -801,7 +804,124 @@ function mkLoanTodoFromButton(btn){
  renderAll();
 }
 
+// #79 Memo vocabulary management. No record-entry integration in this version.
+let mkMemoData={groups:[],words:[]};
+let mkMemoView='words',mkMemoScope='',mkMemoEdit=null,mkMemoDuplicate='',mkMemoDrag=null;
+function mkMemoValidate(data){return MKMigrations.validateMemo(data)}
+function mkMemoId(){return 'memo-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,10)}
+let mkMemoOrigin='other';
+function mkMemoHistory(replace=false){const state={mkPage:'memoManager',memo:{view:mkMemoView,scope:mkMemoScope,modal:!!mkMemoEdit,origin:mkMemoOrigin}};history[replace?'replaceState':'pushState'](state,'',location.href)}
+function mkMemoOpen(origin='other'){mkMemoOrigin=origin;mkMemoScope='';mkMemoView='words';mkMemoRender();openOther('memoManager');mkMemoHistory(true)}
+function mkMemoTab(view){if(view===mkMemoView&&!mkMemoScope)return;if(view==='words'){if(mkMemoView!=='words')history.go(mkMemoScope?-2:-1);return}const replace=mkMemoView!=='words'&&!mkMemoScope;mkMemoView=view;mkMemoScope='';mkMemoRender();mkMemoHistory(replace)}
+function mkMemoEnter(index){mkMemoScope=mkMemoView==='groups'?mkMemoData.groups[index].id:cats[index];mkMemoRender();mkMemoHistory()}
+function mkMemoRows(){return mkMemoScope?mkMemoData.words.filter(w=>mkMemoView==='groups'?w.group===mkMemoScope:w.cats.includes(mkMemoScope)):mkMemoView==='words'?[...mkMemoData.words]:[...mkMemoData.groups]}
+function mkMemoPersist(){mkQueueSave();mkMemoRender()}
+function mkMemoScrollStrip(texts,className){
+ const strip=document.createElement('div');strip.className='mk-memo-strip '+className;
+ strip.setAttribute('aria-label',className==='mk-memo-category-strip'?'関連カテゴリ':'登録済みの言葉');strip.tabIndex=0;
+ texts.forEach(text=>{const tag=document.createElement('span');tag.className='mk-memo-tag';tag.textContent=text;strip.append(tag)});
+ const update=()=>{strip.classList.toggle('has-more',strip.scrollWidth-strip.clientWidth-strip.scrollLeft>2);strip.classList.toggle('has-before',strip.scrollLeft>2)};
+ strip.addEventListener('scroll',update,{passive:true});requestAnimationFrame(update);return strip;
+}
+window.addEventListener('resize',()=>document.querySelectorAll('#mkMemoRows .mk-memo-strip').forEach(s=>s.dispatchEvent(new Event('scroll'))));
+function mkMemoRender(){
+ if(!$('mkMemoRows'))return;
+ const scoped=!!mkMemoScope,wordRows=scoped||mkMemoView==='words',group=mkMemoData.groups.find(g=>g.id===mkMemoScope),allWords=!scoped&&mkMemoView==='words';
+ $('mkMemoHeading').textContent=scoped?(mkMemoView==='groups'?'分類：'+(group?.name||''):'カテゴリ：'+mkMemoScope):'🎀 メモ';
+ $('mkMemoTabs').hidden=scoped;
+ $('mkMemoBack').textContent=scoped?'← 一覧へ':mkMemoView==='words'?(mkMemoOrigin==='record'?'← 記録へ':'← その他へ'):'← 言葉一覧へ';
+ $('mkMemoAdd').hidden=!scoped&&mkMemoView==='cats';$('mkMemoAdd').textContent='＋追加';
+ $('mkMemoListLabel').textContent=wordRows?'言葉':mkMemoView==='groups'?'分類':'カテゴリ';
+ document.querySelectorAll('#mkMemoTabs button').forEach(b=>b.classList.toggle('active',b.dataset.view===mkMemoView));
+ const rows=$('mkMemoRows');rows.innerHTML='';
+ const list=!scoped&&mkMemoView==='cats'?cats:mkMemoRows();
+ const appendRow=(item,i)=>{
+  const catRow=!scoped&&mkMemoView==='cats',row=document.createElement('div');row.className='mk-memo-row'+(catRow?' mk-memo-category-row':'')+(wordRows?' mk-memo-word-row':'');row.dataset.id=catRow?String(i):item.id;
+  const main=document.createElement(wordRows?'div':'button');main.className='mk-memo-name';
+  const title=document.createElement('span');title.className='mk-memo-word';title.textContent=catRow?item:wordRows?item.text:item.name;main.append(title);
+  if(!wordRows){main.type='button';main.onclick=()=>mkMemoEnter(i);const arrow=document.createElement('span');arrow.textContent='›';arrow.className='mk-memo-arrow';main.append(arrow)}else{
+   const groupName=mkMemoData.groups.find(g=>g.id===item.group)?.name||'';
+   if(mkMemoView==='cats'){const meta=document.createElement('span');meta.className='mk-memo-meta';meta.textContent=groupName;main.append(meta)}
+   else if(item.cats.length)main.append(mkMemoScrollStrip(item.cats,'mk-memo-category-strip'));
+   main.title=[item.text,groupName,...item.cats].join(' / ');
+  }
+  row.append(main);
+  if(catRow){const words=mkMemoData.groups.flatMap(g=>mkMemoData.words.filter(w=>w.group===g.id&&w.cats.includes(item))).map(w=>w.text);if(words.length)row.append(mkMemoScrollStrip(words,'mk-memo-preview'));else{const empty=document.createElement('span');empty.className='mk-memo-preview-empty';empty.textContent='登録なし';row.append(empty)}}
+  else{const actions=document.createElement('div');actions.className='history-actions';for(const [label,del] of(wordRows?[['編集',false]]:[['編集',false],['削除',true]])){const b=document.createElement('button');b.type='button';b.className='ghost sm'+(del?' danger':'');b.textContent=label;b.onclick=()=>del?mkMemoDelete('group',item.id):mkMemoForm(wordRows?'word':'group',item.id);actions.append(b)}row.append(actions)}
+  if(!catRow&&!allWords){const handle=document.createElement('button');handle.type='button';handle.className='mk-memo-grip';handle.textContent='⠿';handle.setAttribute('aria-label','長押しで並べ替え。上下キーでも移動');handle.addEventListener('pointerdown',e=>mkMemoDragStart(e,row));handle.addEventListener('keydown',e=>{if(['ArrowUp','ArrowDown'].includes(e.key)){e.preventDefault();mkMemoReorder(i,i+(e.key==='ArrowUp'?-1:1))}});row.append(handle)}
+  rows.append(row);
+ };
+ if(allWords){mkMemoData.groups.forEach(g=>{const words=list.filter(w=>w.group===g.id);if(!words.length)return;const heading=document.createElement('div');heading.className='mk-memo-section-title';heading.textContent=g.name;rows.append(heading);words.forEach(appendRow)})}else list.forEach(appendRow);
+ if(!list.length)rows.innerHTML='<div class="small mk-memo-empty">'+(wordRows?'言葉はまだありません。〔＋追加〕から登録できます。':'分類はまだありません。〔＋追加〕から登録してください。')+'</div>';
+ $('mkMemoHint').textContent=list.length&&!allWords&&!(mkMemoView==='cats'&&!scoped)?'右のつまみを長押しして並べ替え':'';
+}
+
+function mkMemoBack(){history.back()}
+function mkMemoForm(kind,id='',defaults=null){
+ const item=(kind==='group'?mkMemoData.groups:mkMemoData.words).find(x=>x.id===id);
+ const alreadyOpen=!!mkMemoEdit;mkMemoEdit={kind,id};mkMemoDuplicate='';
+ $('mkMemoModal').classList.toggle('mk-memo-group-form',kind==='group');$('mkMemoDeleteWord').hidden=kind!=='word'||!id;
+ $('mkMemoCategories').closest('details').open=false;
+ $('mkMemoFormTitle').textContent=(kind==='group'?'分類':'言葉')+'を'+(id?'編集':'追加');
+ $('mkMemoTextLabel').textContent=kind==='group'?'分類名':'言葉';
+ $('mkMemoText').value=item?(kind==='group'?item.name:item.text):'';
+ $('mkMemoWordFields').hidden=kind==='group';$('mkMemoNext').hidden=kind==='group'||!!id;
+ $('mkMemoFeedback').textContent='';$('mkMemoDuplicateActions').hidden=true;
+ const chosen=item?.group||defaults?.group||(mkMemoView==='groups'&&mkMemoScope?mkMemoScope:'');
+ $('mkMemoGroup').innerHTML='<option value="">分類を選択</option>'+mkMemoData.groups.map(g=>`<option value="${safeHtml(g.id)}">${safeHtml(g.name)}</option>`).join('');$('mkMemoGroup').value=chosen;
+ const selected=item?.cats||defaults?.cats||(mkMemoView==='cats'&&mkMemoScope?[mkMemoScope]:[]);
+ $('mkMemoCategories').innerHTML=cats.map((c,i)=>`<label class="mk-memo-cat"><input type="checkbox" value="${i}" ${selected.includes(c)?'checked':''}><span>${safeHtml(c)}</span></label>`).join('');
+ $('mkMemoInlineGroup').value='';mkMemoToggleInlineGroup(false);
+ $('mkMemoModal').classList.remove('hidden');document.body.classList.add('mk-memo-modal-open');mkMemoViewport();if(!alreadyOpen)mkMemoHistory();
+}
+function mkMemoClose(){mkMemoHide();if(history.state?.memo?.modal)history.back()}
+function mkMemoHide(){$('mkMemoModal').classList.add('hidden');document.body.classList.remove('mk-memo-modal-open');mkMemoEdit=null;document.activeElement?.blur()}
+function mkMemoDeleteEditing(){if(!mkMemoEdit?.id)return;const id=mkMemoEdit.id;mkMemoDelete('word',id);if(!mkMemoData.words.some(w=>w.id===id))mkMemoClose()}
+function mkMemoViewport(){const m=$('mkMemoModal');if(!m||m.classList.contains('hidden'))return;const v=window.visualViewport;m.style.top=(v?.offsetTop||0)+'px';m.style.height=(v?.height||innerHeight)+'px'}
+window.visualViewport?.addEventListener('resize',mkMemoViewport);window.visualViewport?.addEventListener('scroll',mkMemoViewport);window.addEventListener('resize',mkMemoViewport);
+function mkMemoToggleInlineGroup(open){const box=$('mkMemoInlineGroupBox'),button=$('mkMemoInlineGroupToggle');const show=typeof open==='boolean'?open:box.hidden;box.hidden=!show;button.textContent=show?'閉じる':'＋追加';button.setAttribute('aria-expanded',String(show));if(show)$('mkMemoInlineGroup').focus()}
+function mkMemoNewGroupInline(){const name=$('mkMemoInlineGroup').value.trim();if(!name){$('mkMemoFeedback').textContent='分類名を入力してください。';return}let g=mkMemoData.groups.find(x=>x.name.trim()===name);if(!g){g={id:mkMemoId(),name};mkMemoData.groups.push(g);mkMemoPersist()}const opt=document.createElement('option');opt.value=g.id;opt.textContent=g.name;if(![...$('mkMemoGroup').options].some(o=>o.value===g.id))$('mkMemoGroup').append(opt);$('mkMemoGroup').value=g.id;mkMemoToggleInlineGroup(false);$('mkMemoInlineGroup').value='';$('mkMemoInlineGroupToggle').focus();$('mkMemoFeedback').textContent=''}
+function mkMemoSave(next=false){
+ if(!mkMemoEdit)return;const text=$('mkMemoText').value.trim(),{kind,id}=mkMemoEdit;
+ $('mkMemoFeedback').textContent='';$('mkMemoDuplicateActions').hidden=true;mkMemoDuplicate='';
+ if(!text){$('mkMemoFeedback').textContent=(kind==='group'?'分類名':'言葉')+'を入力してください。';return}
+ const list=kind==='group'?mkMemoData.groups:mkMemoData.words,dupe=list.find(x=>x.id!==id&&(kind==='group'?x.name:x.text).trim()===text);
+ if(dupe){$('mkMemoFeedback').textContent='「'+text+'」は登録済みです。'+(kind==='word'?' 分類：'+mkMemoData.groups.find(g=>g.id===dupe.group)?.name:'');if(kind==='word'){mkMemoDuplicate=dupe.id;$('mkMemoDuplicateActions').hidden=false;const cat=mkMemoView==='cats'?mkMemoScope:'';$('mkMemoLinkDuplicate').hidden=!cat;$('mkMemoLinkDuplicate').disabled=dupe.cats.includes(cat);$('mkMemoLinkDuplicate').textContent=dupe.cats.includes(cat)?'このカテゴリには関連づけ済みです':'このカテゴリを関連づける'}return}
+ const group=$('mkMemoGroup').value,links=[...document.querySelectorAll('#mkMemoCategories input:checked')].map(x=>cats[Number(x.value)]);
+ if(kind==='word'&&!mkMemoData.groups.some(g=>g.id===group)){$('mkMemoFeedback').textContent='分類を選択または追加してください。';return}
+ const value=kind==='group'?{id:id||mkMemoId(),name:text}:{id:id||mkMemoId(),text,group,cats:links};const index=list.findIndex(x=>x.id===id);if(index<0)list.push(value);else list[index]=value;
+ mkMemoPersist();if(next){mkMemoForm('word','',{group,cats:links});$('mkMemoFeedback').textContent='保存しました。続けて登録できます。';$('mkMemoText').focus()}else mkMemoClose();
+}
+function mkMemoEditDuplicate(){if(mkMemoDuplicate)mkMemoForm('word',mkMemoDuplicate)}
+function mkMemoLinkDuplicate(){const w=mkMemoData.words.find(x=>x.id===mkMemoDuplicate);if(!w||mkMemoView!=='cats'||!mkMemoScope)return;if(!w.cats.includes(mkMemoScope))w.cats.push(mkMemoScope);mkMemoPersist();mkMemoClose()}
+function mkMemoDelete(kind,id){const list=kind==='group'?mkMemoData.groups:mkMemoData.words,item=list.find(x=>x.id===id);if(!item)return;const count=mkMemoData.words.filter(w=>w.group===id).length;if(!confirm(kind==='group'?'分類「'+item.name+'」を削除しますか？'+(count?'\n中の言葉 '+count+'件も削除されます。':''):'「'+item.text+'」をリストから削除しますか？'))return;
+ if(kind==='group'){mkMemoData.groups=mkMemoData.groups.filter(g=>g.id!==id);mkMemoData.words=mkMemoData.words.filter(w=>w.group!==id)}else mkMemoData.words=mkMemoData.words.filter(w=>w.id!==id);mkMemoPersist()
+}
+// Reorder only the visible subset, retaining positions of words in other groups.
+function mkMemoReorder(from,to){if(!mkMemoScope&&mkMemoView==='words')return;const visible=mkMemoRows();if(to<0||to>=visible.length||from===to)return;const ids=new Set(visible.map(x=>x.id));visible.splice(to,0,visible.splice(from,1)[0]);if(!mkMemoScope&&mkMemoView==='groups')mkMemoData.groups=visible;else {let i=0;mkMemoData.words=mkMemoData.words.map(w=>ids.has(w.id)?visible[i++]:w)}mkMemoPersist()}
+function mkMemoDragStart(e,row){
+ if(e.button!==0||mkMemoDrag)return;e.preventDefault();
+ const grip=$('mkMemoRows');grip.setPointerCapture(e.pointerId);
+ const d={row,grip,id:e.pointerId,x:e.clientX,y:e.clientY,lastY:e.clientY,active:false,ghost:null,raf:0};mkMemoDrag=d;
+ d.timer=setTimeout(()=>{d.active=true;const r=row.getBoundingClientRect();d.offset=d.y-r.top;d.ghost=row.cloneNode(true);d.ghost.classList.add('mk-memo-floating');Object.assign(d.ghost.style,{width:r.width+'px',left:r.left+'px',top:r.top+'px'});document.body.append(d.ghost);row.classList.add('mk-memo-placeholder');d.raf=requestAnimationFrame(mkMemoDragFrame)},330);
+ grip.addEventListener('pointermove',mkMemoDragMove);grip.addEventListener('pointerup',mkMemoDragEnd);grip.addEventListener('pointercancel',mkMemoDragCancel);grip.addEventListener('lostpointercapture',mkMemoDragCancel);
+}
+function mkMemoDragMove(e){const d=mkMemoDrag;if(!d)return;d.lastY=e.clientY;if(!d.active&&Math.hypot(e.clientX-d.x,e.clientY-d.y)>10)mkMemoDragCancel()}
+function mkMemoDragFrame(){const d=mkMemoDrag;if(!d?.active)return;d.ghost.style.top=(d.lastY-d.offset)+'px';const bottom=document.querySelector('.bottom').getBoundingClientRect().top;if(d.lastY<95)window.scrollBy(0,-7);else if(d.lastY>bottom-45)window.scrollBy(0,7);
+ const siblings=[...$('mkMemoRows').children],before=new Map(siblings.map(x=>[x,x.getBoundingClientRect().top]));
+ const target=siblings.find(x=>x!==d.row&&d.lastY<x.getBoundingClientRect().top+x.offsetHeight/2);
+ if(target)$('mkMemoRows').insertBefore(d.row,target);else $('mkMemoRows').append(d.row);
+ for(const el of siblings){if(el===d.row)continue;const delta=before.get(el)-el.getBoundingClientRect().top;if(delta)el.animate([{transform:`translateY(${delta}px)`},{transform:'translateY(0)'}],{duration:160,easing:'ease-out'})}
+ d.raf=requestAnimationFrame(mkMemoDragFrame);
+}
+function mkMemoDragEnd(){mkMemoDragFinish(true)}function mkMemoDragCancel(){mkMemoDragFinish(false)}
+function mkMemoDragFinish(save){const d=mkMemoDrag;if(!d)return;mkMemoDrag=null;clearTimeout(d.timer);cancelAnimationFrame(d.raf);d.grip.removeEventListener('pointermove',mkMemoDragMove);d.grip.removeEventListener('pointerup',mkMemoDragEnd);d.grip.removeEventListener('pointercancel',mkMemoDragCancel);d.grip.removeEventListener('lostpointercapture',mkMemoDragCancel);d.ghost?.remove();d.row.classList.remove('mk-memo-placeholder');if(d.grip.hasPointerCapture(d.id))d.grip.releasePointerCapture(d.id);
+ if(d.active&&save){const visible=mkMemoRows(),from=visible.findIndex(x=>x.id===d.row.dataset.id),to=[...$('mkMemoRows').children].indexOf(d.row);mkMemoReorder(from,to)}mkMemoRender();
+}
+
+
 function mkState(){return {
+  miniSchemaVersion:MKMigrations.currentVersion,mkMemoData,
   txs,loans,cashbook,snapshots,wishes,recurring,eventsData,mkTodos,mkTodoHidden,
   billAdjustments,billItemAdjustments,mkPaidBills,deletedEventNames,
   loanArchivedPeople,loanGroups,loanGroupSerial,
@@ -809,7 +929,8 @@ function mkState(){return {
   balances:Object.fromEntries(Object.entries(balances).map(([key,val])=>[key,val.v]))
 }}
 function mkRestoreState(state){
-  if(!state||typeof state!=='object')throw new Error('Invalid data');
+  state=MKMigrations.upgradeState(state);
+  mkMemoData=state.mkMemoData;
   const arrayKeys=['txs','loans','cashbook','snapshots','wishes','recurring','eventsData','deletedEventNames','loanArchivedPeople','loanGroups'];
   for(const key of arrayKeys)if(state[key]!==undefined&&!Array.isArray(state[key]))throw new Error('Invalid '+key);
   for(const key of arrayKeys)if(state[key]!==undefined){switch(key){
@@ -869,6 +990,7 @@ function mkWrapSave(name){const fn=globalThis[name];if(typeof fn!=='function')re
 ['saveSnapshot','addWish','editMonthlyBudget','editCategoryBudget'].forEach(mkWrapSave);
 // Step2 draft: restore persisted data before the first render.
 async function mkBoot(){
+  let lastRequestedPage='';try{lastRequestedPage=sessionStorage.getItem('mk-last-page')||''}catch(_){}
   await MKStorage.unlock();
   try {
     const saved=await MKStorage.load();
@@ -884,7 +1006,9 @@ async function mkBoot(){
   if(!eventsData.some(e=>e.name==='NZ旅行'))eventsData.push({id:'mini-event-nz-trip',name:'NZ旅行',start:'',end:'',budget:0,catBudgets:{},archived:false,baseSpent:0});
   deletedEventNames=deletedEventNames.filter(name=>name!=='NZ旅行');
   renderPayBtns();renderCharge();renderAll();updateForm();initMoneyInputs();mkDisplayPage('record',mkNavigationButton('record'));
-  try{const last=sessionStorage.getItem('mk-last-page');if(['record','history','budget'].includes(last)&&$(last)?.classList.contains('page')){const navBtn=document.querySelector(`.nav[onclick*="'${last}'"]`);nav(last,navBtn||null);if(['loans','events','wish'].includes(last)){const otherNav=document.querySelectorAll('.nav')[5];if(otherNav)otherNav.classList.add('active')}}}catch(_){}
+  try{const last=lastRequestedPage;if(['record','history','budget','other','events','memoManager'].includes(last)&&$(last)?.classList.contains('page')){const navBtn=document.querySelector(`.nav[onclick*="'${last}'"]`);nav(last,navBtn||null);if(['loans','events','wish'].includes(last)){const otherNav=document.querySelectorAll('.nav')[5];if(otherNav)otherNav.classList.add('active')}}}catch(_){}
+  mkMemoRender();
+  if(document.querySelector('.page.active')?.id==='memoManager'){history.replaceState({mkPage:'other'},'',location.href);mkMemoView='words';mkMemoScope='';mkMemoHistory();}
   new MutationObserver(()=>initMoneyInputs()).observe(document.body,{childList:true,subtree:true});
 }
 mkBoot();

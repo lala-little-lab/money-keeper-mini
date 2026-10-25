@@ -13,8 +13,8 @@ const MKStorage=(()=>{
  async function encrypt(data){const iv=random(12), ciphertext=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,encoder.encode(JSON.stringify(data)));return {iv:b64(iv),ciphertext:b64(ciphertext)}}
  async function decrypt(payload){return JSON.parse(decoder.decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(payload.iv)},key,unb64(payload.ciphertext))))}
  async function unlock(){const stored=await get();return new Promise((resolve)=>{const help=document.getElementById('miniLockHelp'),button=document.getElementById('miniUnlock'),input=document.getElementById('miniPassword'),error=document.getElementById('miniLockError');help.textContent=stored?'保存データのパスワードを入力してください。':'初回用パスワードを12文字以上で設定してください。';button.onclick=async()=>{button.disabled=true;error.textContent='';try{const pass=input.value;if(!stored&&pass.length<12)throw Error('12文字以上にしてください');const salt=stored?unb64(stored.salt):random(16);const candidate=await derive(pass,salt);if(stored){await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(stored.iv)},candidate,unb64(stored.ciphertext))}key=candidate;MKStorage._salt=b64(salt);input.value='';document.getElementById('miniLock').remove();resolve()}catch(e){error.textContent='解除できません。パスワードを確認してください。'}finally{button.disabled=false}};input.addEventListener('keydown',e=>{if(e.key==='Enter')button.click()})})}
- async function load(){const payload=await get();return payload?decrypt(payload):null}
- function save(data){queue=queue.catch(()=>{}).then(async()=>{if(!key)throw Error('Locked');const item=await encrypt(data);await put({...item,salt:MKStorage._salt,format:'mini-encrypted-v1'})});return queue}
+ async function load(){const payload=await get();return payload?MKMigrations.upgradeState(await decrypt(payload)):null}
+ function save(data){let snapshot;try{snapshot=MKMigrations.upgradeState(data)}catch(e){return Promise.reject(e)}queue=queue.catch(()=>{}).then(async()=>{if(!key)throw Error('Locked');const item=await encrypt(snapshot);await put({...item,salt:MKStorage._salt,format:'mini-encrypted-v1'})});return queue}
  async function exportEncrypted(data){await save(data);await queue;return {format:'money-keeper-mini-encrypted',version:1,exportedAt:new Date().toISOString(),payload:await get()}}
  function validateBackupState(state){
   const plain=x=>x!==null&&typeof x==='object'&&!Array.isArray(x);
@@ -36,7 +36,7 @@ const MKStorage=(()=>{
   if(state.balances!==undefined){
     if(!plain(state.balances)||Object.values(state.balances).some(x=>typeof x!=='number'||!Number.isFinite(x)))throw Error('残高情報が不正です');
   }
-  return state;
+  return MKMigrations.upgradeState(state);
  }
  async function importEncrypted(obj,password){if(obj?.format!=='money-keeper-mini-encrypted'||obj.version!==1)throw Error('未対応の形式');const item=obj.payload;const candidate=await derive(password,unb64(item.salt));const decoded=JSON.parse(decoder.decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(item.iv)},candidate,unb64(item.ciphertext))));return validateBackupState(decoded)}
  return {unlock,load,save,exportEncrypted,importEncrypted};
