@@ -111,7 +111,150 @@ function mkChooseRakPaySource(k){rakutenPaySource=k;mkRefreshRakPaySource()}
 function mkRefreshRakPaySource(){const box=$('mkRakPaySource');if(!box)return;box.classList.toggle('hidden',!(mode==='expense'&&payment==='rakutenpay'));$('mkRakPayCard').classList.toggle('active',rakutenPaySource==='rakuten');$('mkRakPayBank').classList.toggle('active',rakutenPaySource==='rakbank');$('mkRakPayCash').classList.toggle('active',rakutenPaySource==='rakutencash')}
 function pickPay(k,b){payment=k;document.querySelectorAll('#payBtns .mini,#otherPays .mini').forEach(x=>x.classList.remove('active'));b.classList.add('active');$('installmentField').classList.toggle('hidden',!['dcard','rakuten','epos','lumine'].includes(k));mkRefreshRakPaySource()}
 function pickInstallment(n,b){installments=n;document.querySelectorAll('#installmentField .mini').forEach(x=>x.classList.remove('active'));b.classList.add('active')}
-function pickCategory(){openPicker('カテゴリを選択',cats.map(c=>({label:c,value:c})),(v,l)=>{category=v;$('categoryBtn').firstElementChild.textContent=l;mkCandidateRender()})}
+let mkCategoryOpen=false;
+const mkCategoryScrollConfig={saveGap:24,topGap:8,listGap:8};
+let mkCategoryDrag=null,mkCategoryIgnoreClickUntil=0;
+let mkCategoryAutoUntil=0,mkCategoryAutoSpan=0;
+let mkCategoryStopFrame=0,mkCategorySmoothTarget=null,mkCategoryReturning=false;
+function mkCategoryIsBorrowed(){return mode==='loan'&&loanKind==='borrowed'}
+function mkCategoryViewport(){
+ const v=window.visualViewport;
+ const top=v?v.offsetTop:0,bottom=top+(v?v.height:window.innerHeight);
+ const nav=document.querySelector('.bottom');
+ return {top,bottom:nav?Math.min(bottom,nav.getBoundingClientRect().top):bottom};
+}
+function mkCategoryMaxScroll(){
+ return Math.max(0,window.scrollY+$('categoryBtn').getBoundingClientRect().top-mkCategoryViewport().top-mkCategoryScrollConfig.topGap);
+}
+function mkCategoryScrollSpace(y){
+ const record=$('record');let space=$('mkCategoryScrollSpace');
+ if(!record.getClientRects().length){if(space)space.remove();return}
+ if(!space){space=document.createElement('div');space.id='mkCategoryScrollSpace';space.setAttribute('aria-hidden','true');record.appendChild(space)}
+ const naturalHeight=document.documentElement.scrollHeight-space.getBoundingClientRect().height;
+ const needed=Math.max(0,Math.ceil(y+window.innerHeight-naturalHeight));
+ space.style.height=needed+'px';
+}
+function mkCategoryScrollTo(y,behavior='instant'){
+ cancelAnimationFrame(mkCategoryStopFrame);
+ const maxPage=Math.max(0,document.documentElement.scrollHeight-window.innerHeight);
+ const top=Math.max(0,Math.min(y,mkCategoryMaxScroll(),maxPage));
+ mkCategorySmoothTarget=behavior==='smooth'?top:null;
+ window.scrollTo({top,behavior});
+}
+function mkCategoryAlignAutomatically(){
+ const view=mkCategoryViewport();
+ const target=Math.max(view.top+mkCategoryScrollConfig.topGap,view.bottom-mkCategoryScrollConfig.saveGap-mkCategoryAutoSpan);
+ mkCategoryScrollTo(window.scrollY+$('categoryBtn').getBoundingClientRect().top-target,'smooth');
+}
+function mkCategoryViewportChanged(){
+ // Finish the initial alignment if closing the keyboard/browser chrome resizes
+ // the viewport. Manual interaction immediately ends this brief opening phase.
+ if(mkCategoryOpen&&performance.now()<mkCategoryAutoUntil)mkCategoryAlignAutomatically();
+ mkPositionCategoryDropdown();
+}
+function mkCategoryCompactSpan(){
+ // An inert, invisible copy measures both conditions without changing real inputs.
+ // Include the payment section even for "相手が立替" to share the same target.
+ const source=$('record'),copy=source.cloneNode(true);
+ copy.setAttribute('aria-hidden','true');copy.inert=true;
+ copy.classList.add('active');
+ Object.assign(copy.style,{position:'fixed',left:'-10000px',top:'0',width:source.getBoundingClientRect().width+'px',visibility:'hidden',pointerEvents:'none'});
+ copy.querySelector('#paymentField').classList.remove('hidden');
+ // The current event banner is expense-only. Use its same date-based footprint
+ // for 私が立替 too. 相手が立替 always uses the normal-period target.
+ const date=$('date').value,hits=mkCategoryIsBorrowed()?[]:eventsData.filter(e=>!e.archived&&e.start&&e.end&&date>=e.start&&date<=e.end);
+ const eventBox=copy.querySelector('#mkEventSuggestion');
+ eventBox.classList.toggle('hidden',!hits.length);
+ eventBox.innerHTML=hits.map(e=>`<div class="mk-event-suggest-card"><div class="mk-event-suggest-top"><span>🌟特別費イベント期間中</span><button type="button" class="mk-event-fixed">ONで固定</button></div><div class="mk-event-name-row"><button type="button" class="mk-event-name-toggle"><span class="mk-event-state">OFF</span><span class="mk-event-name-text">${safeHtml(e.name)}</span></button></div></div>`).join('');
+ ['optionalInner','otherPays','installmentField','mkRakPaySource','mkCategoryDropdown'].forEach(id=>copy.querySelector('#'+id).classList.add('hidden'));
+ document.body.appendChild(copy);
+ try{return copy.querySelector('.record-save').getBoundingClientRect().bottom-copy.querySelector('#categoryBtn').getBoundingClientRect().top}
+ finally{copy.remove()}
+}
+// #72: stop native smooth motion at the current position on close or manual input.
+function mkStopCategoryAutoScroll(){
+ mkCategoryReturning=false;
+ mkCategoryAutoUntil=0;
+ cancelAnimationFrame(mkCategoryStopFrame);
+ const y=window.scrollY;
+ const moving=mkCategorySmoothTarget!==null&&Math.abs(y-mkCategorySmoothTarget)>1;
+ mkCategorySmoothTarget=null;
+ if(!moving)return;
+ window.scrollTo({top:y,behavior:'instant'});
+ // Cancel a compositor frame that may already be queued by native smooth scrolling.
+ mkCategoryStopFrame=requestAnimationFrame(()=>window.scrollTo({top:y,behavior:'instant'}));
+}
+function mkCloseCategoryDropdown(returnToSave=false){
+ const wasOpen=mkCategoryOpen;
+ const d=$('mkCategoryDropdown');if(!d)return;
+ if(mkCategoryOpen||mkCategoryReturning)mkStopCategoryAutoScroll();
+ d.classList.add('hidden');mkCategoryOpen=false;mkCategoryDrag=null;mkCategoryAutoUntil=0;
+ if($('mkCategoryScrollSpace'))mkCategoryScrollSpace(window.scrollY);
+ const b=$('categoryBtn');b.setAttribute('aria-expanded','false');b.lastElementChild.textContent='›';
+ // #74: every user dismissal returns 相手が立替 to its save-button position.
+ if(wasOpen&&returnToSave)mkCategoryReturnToSave();
+}
+// 相手が立替 returns the save button near the tabs when the dropdown closes.
+function mkCategoryReturnToSave(){
+ if(!mkCategoryIsBorrowed())return;
+ const save=document.querySelector('#record .record-save');
+ const target=Math.max(0,Math.min(window.scrollY,window.scrollY+save.getBoundingClientRect().bottom-mkCategoryViewport().bottom+mkCategoryScrollConfig.saveGap));
+ mkCategoryReturning=window.scrollY-target>1;
+ mkCategoryScrollTo(target,'smooth');
+}
+function mkPositionCategoryDropdown(){
+ if(!mkCategoryOpen){if(mkCategoryReturning&&Math.abs(window.scrollY-mkCategorySmoothTarget)<=1)mkCategoryReturning=false;if($('mkCategoryScrollSpace'))mkCategoryScrollSpace(window.scrollY);return}
+ const b=$('categoryBtn'),d=$('mkCategoryDropdown');
+ if(!b.getClientRects().length){mkCloseCategoryDropdown();return}
+ mkCategoryScrollSpace(mkCategoryMaxScroll());
+ const limit=mkCategoryMaxScroll();
+ if(window.scrollY>limit+.5)mkCategoryScrollTo(limit);
+ const r=b.getBoundingClientRect(),view=mkCategoryViewport(),top=r.bottom+2;
+ d.style.left=r.left+'px';d.style.width=r.width+'px';d.style.top=top+'px';
+ // Use the real navigation boundary, without a minimum that can cover the tabs.
+ d.style.maxHeight=Math.max(0,view.bottom-top-mkCategoryScrollConfig.listGap)+'px';
+}
+function pickCategory(){
+ if(performance.now()<mkCategoryIgnoreClickUntil)return;
+ if(mkCategoryOpen){mkCloseCategoryDropdown(true);return}
+ const b=$('categoryBtn'),d=$('mkCategoryDropdown');if(!b||!d)return;
+ mkCategoryAutoSpan=mkCategoryCompactSpan();
+ mkCategoryAutoUntil=performance.now()+600;
+ if(document.activeElement&&document.activeElement.matches('input,textarea'))document.activeElement.blur();
+ d.innerHTML='';
+ cats.forEach(c=>{const item=document.createElement('button');item.type='button';item.className='mk-category-item'+(category===c?' is-selected':'');item.textContent=c;item.setAttribute('role','option');item.setAttribute('aria-selected',String(category===c));item.addEventListener('click',()=>{category=c;b.firstElementChild.textContent=c;mkCloseCategoryDropdown(true);mkCandidateRender()});d.appendChild(item)});
+ mkCategoryOpen=true;b.setAttribute('aria-expanded','true');b.lastElementChild.textContent='⌃';
+ mkCategoryScrollSpace(mkCategoryMaxScroll());
+ mkCategoryAlignAutomatically();
+ d.classList.remove('hidden');d.scrollTop=0;mkPositionCategoryDropdown();
+}
+document.addEventListener('pointerdown',e=>{if(mkCategoryReturning)mkStopCategoryAutoScroll();if(mkCategoryOpen){mkStopCategoryAutoScroll();if(!e.target.closest('#categoryField'))mkCloseCategoryDropdown(true)}});
+window.addEventListener('wheel',()=>{if(mkCategoryOpen||mkCategoryReturning)mkStopCategoryAutoScroll()},{passive:true});
+// Control touch dragging on the category button so momentum cannot hide it.
+$('categoryBtn').addEventListener('pointerdown',e=>{
+ if(!mkCategoryOpen||e.pointerType==='mouse'||!e.isPrimary)return;
+ mkCategoryDrag={id:e.pointerId,lastY:e.clientY,startY:e.clientY,moved:false};
+ e.currentTarget.setPointerCapture(e.pointerId);
+});
+$('categoryBtn').addEventListener('pointermove',e=>{
+ const drag=mkCategoryDrag;if(!mkCategoryOpen||!drag||drag.id!==e.pointerId)return;
+ if(Math.abs(e.clientY-drag.startY)>5)drag.moved=true;
+ if(drag.moved){e.preventDefault();mkCategoryIgnoreClickUntil=performance.now()+500;mkCategoryScrollTo(window.scrollY+drag.lastY-e.clientY);mkPositionCategoryDropdown()}
+ drag.lastY=e.clientY;
+});
+function mkEndCategoryDrag(e){
+ if(!mkCategoryDrag||mkCategoryDrag.id!==e.pointerId)return;
+ if(mkCategoryDrag.moved)mkCategoryIgnoreClickUntil=performance.now()+500;
+ mkCategoryDrag=null;
+}
+$('categoryBtn').addEventListener('pointerup',mkEndCategoryDrag);
+$('categoryBtn').addEventListener('pointercancel',mkEndCategoryDrag);
+window.addEventListener('scroll',mkPositionCategoryDropdown,{passive:true});
+window.addEventListener('resize',mkCategoryViewportChanged);
+if(window.visualViewport){window.visualViewport.addEventListener('resize',mkCategoryViewportChanged);window.visualViewport.addEventListener('scroll',mkPositionCategoryDropdown);}
+
+
+
 function pickEvent(){openPicker('特別費イベント',[{label:'なし',value:''},...eventsData.filter(e=>!e.archived).map(e=>({label:e.name,value:e.name}))],(v,l)=>{mkSetEventTag(v);$('fxBox').classList.toggle('hidden',true)})}
 let mkEventFixed={};
 // #76: memo-only event controls never assign eventTag or affect event totals.
@@ -209,7 +352,8 @@ function pickDiscount(v,b){discount=v;document.querySelectorAll('#discountBtns .
 function setTransferFeeSide(side,b){transferFeeSide=side;document.querySelectorAll('#transferFeePayer .mini').forEach(x=>x.classList.remove('active'));if(b)b.classList.add('active')}
 function toggleTransferFeePayer(){let fee=moneyNum($('transferFee').value);$('transferFeePayer').classList.toggle('hidden',fee<=0)}
 function saveRecord(){let d=$('date').value,a=moneyNum($('amount').value),memo=$('memo').value.trim(),pts=Number($('points').value||0),dc=disc(),txid='tx'+Date.now()+Math.random().toString(36).slice(2,7);$('recordError').textContent='';if(mode==='expense'){if(a<=0||!category||!payment)return err('金額・カテゴリ・支払方法を確認してね');let fee=moneyNum($('recordFee').value);if(fee<0)return err('手数料は0円以上にしてね');let paid=Math.max(0,a-pts),billed=Math.round(paid*(1-dc/100))+fee;if(payment==='rakutenpay'&&rakutenPaySource==='rakutencash'&&balances.rakutencash.v<paid+fee)return err('楽天Pay残高が不足しています。ホームの「残高を合わせる」で残高を確認してね');let t={id:txid,date:d,type:'expense',amount:a,paid,billed,fee,category,payment,memo,points:pts,discount:dc,eventTag,installments, ...(payment==='rakutenpay'?{rakutenPaySource}: {})};txs.unshift(t);const payAccount=payment==='rakutenpay'?rakutenPaySource:payment;if(acct(payAccount))move(d,category+(memo?'・'+memo:''),-(paid+fee),payAccount,txid)}else if(mode==='income'){if(a<=0||!payment)return err('入金額と入金先を確認してね');let t={id:txid,date:d,type:'income',amount:a,payment,memo};txs.unshift(t);if(acct(payment))move(d,'入金'+(memo?'・'+memo:''),a,payment,txid)}else if(mode==='transfer'){let fee=moneyNum($('transferFee').value),feeSide=fee>0?transferFeeSide:'from';if(a<=0||!from||!to||from===to||fee<0)return err('金額・移動元・移動先・手数料を確認してね');if(fee>0&&feeSide==='to'&&a<=fee)return err('移動先から手数料を引く場合は、移動金額より小さい手数料にしてね');let t={id:txid,date:d,type:'transfer',amount:a,fee,feeSide,from,to};txs.unshift(t);if(feeSide==='to'){balances[from].v-=a;balances[to].v+=a-fee}else{balances[from].v-=a+fee;balances[to].v+=a}if(fee>0)cashbook.unshift({date:d,text:'振込手数料',delta:-fee,refId:txid})}else if(mode==='charge'){if(a<=0||!chargeTarget||!chargeSource)return err('金額・チャージ先・チャージ元を確認してね');let t={id:txid,date:d,type:'charge',amount:a,target:chargeTarget,source:chargeSource,billed:Math.round(a*(1-dc/100)),discount:dc};txs.unshift(t);balances[chargeTarget].v+=a;if(acct(chargeSource)){balances[chargeSource].v-=a}else{cashbook.unshift({date:d,text:(pays.find(x=>x[0]===chargeSource)||['',chargeSource])[1]+'→'+balances[chargeTarget].name+'チャージ',delta:a,refId:txid})}}else if(mode==='loan'){if(loanKind==='lend'){let g=moneyNum($('gross').value),m=moneyNum($('mine').value),t=moneyNum($('theirs').value),p=$('lendPerson').value.trim();if(g<=0||t<=0||Math.round(m+t)!==Math.round(g)||!p||!category||!payment)return err('立替の入力を確認してね');lastSavedLoanPerson=p;let tx={id:txid,date:d,type:'lend',amount:m,gross:g,category,payment,person:p,other:t,memo,eventTag};txs.unshift(tx);if(acct(payment))move(d,category+'（'+p+'分を立替）',-g,payment,txid)}else{let p=$('person').value.trim();if(a<=0||!p)return err('金額と相手を確認してね');lastSavedLoanPerson=p;let fee=['repay','receive'].includes(loanKind)?moneyNum($('recordFee').value):0;if(fee<0)return err('手数料は0円以上にしてね');if(loanKind==='borrowed'){if(!category)return err('カテゴリを選んでね');txs.unshift({id:txid,date:d,type:'borrowed',amount:a,category,person:p,memo,eventTag})}else{if(!payment)return err('支払・受取方法を選んでね');let tx={id:txid,date:d,type:loanKind,amount:a,fee,person:p,payment,memo};txs.unshift(tx);if(acct(payment)){if(loanKind==='repay')move(d,p+'へ返済',-(a+fee),payment,txid);if(loanKind==='receive')move(d,p+'から返済',a-fee,payment,txid);if(loanKind==='loanBorrow')move(d,p+'から借入',a,payment,txid);if(loanKind==='loanLend')move(d,p+'へ貸付',-a,payment,txid)}}}}if(mode==='loan')reviveArchivedLoanPersonOnNewRecord(lastSavedLoanPerson);renderAll();$('goLoansBtn').classList.toggle('hidden',mode!=='loan');$('savedModal').classList.remove('hidden')}
-function err(s){$('recordError').textContent=s}function continueRecord(){$('savedModal').classList.add('hidden');clearFields();scrollTo(0,0)}function goHistory(){$('savedModal').classList.add('hidden');clearFields();nav('history',document.querySelectorAll('.nav')[2])}function goLoans(){$('savedModal').classList.add('hidden');if(lastSavedLoanPerson){loanActivePerson=lastSavedLoanPerson;loanExpandedPerson=lastSavedLoanPerson}loanArchiveView=false;loanOrganize=false;loanAddToGroupId='';loanSelectedIds.clear();clearFields();openOther('loans');renderLoans()}function clearFields(){mkEventMemoSelected='';mkEventMemoParts.clear();mkEventMemoPrevious='';['amount','gross','mine','theirs','lendPerson','person','memo','points','customDiscount','nzd','transferFee','recordFee'].forEach(id=>{if($(id))$(id).value=''});category='';eventTag='';payment='';rakutenPaySource='rakuten';mkRefreshRakPaySource();$('categoryBtn').firstElementChild.textContent='選んでください';$('eventBtn').firstElementChild.textContent='なし';$('optionalInner').classList.add('hidden');if($('optionalMark'))$('optionalMark').textContent='＋';$('otherPays').classList.add('hidden');$('fxBox').classList.add('hidden');mkDefaultEventTag();mkCandidateReset()}
+function err(s){$('recordError').textContent=s}function continueRecord(){$('savedModal').classList.add('hidden');clearFields();scrollTo(0,0)}function goHistory(){$('savedModal').classList.add('hidden');clearFields();nav('history',document.querySelectorAll('.nav')[2])}function goLoans(){$('savedModal').classList.add('hidden');if(lastSavedLoanPerson){loanActivePerson=lastSavedLoanPerson;loanExpandedPerson=lastSavedLoanPerson}loanArchiveView=false;loanOrganize=false;loanAddToGroupId='';loanSelectedIds.clear();clearFields();openOther('loans');renderLoans()}function resetRecordForm(){mkCloseCategoryDropdown();clearFields(false);$('date').value=new Date().toLocaleDateString('sv-SE');from='';to='';chargeTarget='';chargeSource='';installments=1;discount=0;transferFeeSide='from';$('fromBtn').firstElementChild.textContent='選んでください';$('toBtn').firstElementChild.textContent='選んでください';document.querySelectorAll('#installmentField .mini').forEach((b,i)=>b.classList.toggle('active',i===0));document.querySelectorAll('#discountBtns .mini').forEach((b,i)=>b.classList.toggle('active',i===0));if($('customDiscount'))$('customDiscount').classList.add('hidden');if($('fxText'))$('fxText').textContent='';if($('transferFeePayer'))$('transferFeePayer').classList.add('hidden');updateForm();if(typeof renderCharge==='function')renderCharge();mkDefaultEventTag()}
+function clearFields(keepPayment=true){mkEventMemoSelected='';mkEventMemoParts.clear();mkEventMemoPrevious='';const previousPayment=payment;['amount','gross','mine','theirs','lendPerson','person','memo','points','customDiscount','nzd','transferFee','recordFee'].forEach(id=>{if($(id))$(id).value=''});category='';eventTag='';payment=keepPayment?previousPayment:'';rakutenPaySource='rakuten';mkRefreshRakPaySource();$('categoryBtn').firstElementChild.textContent='選んでください';$('eventBtn').firstElementChild.textContent='なし';$('optionalInner').classList.add('hidden');if($('optionalMark'))$('optionalMark').textContent='＋';$('otherPays').classList.add('hidden');$('fxBox').classList.add('hidden');mkDefaultEventTag();renderPayBtns();$('installmentField').classList.toggle('hidden',!['dcard','rakuten','epos','lumine'].includes(payment));$('recordError').textContent='';mkCandidateReset()}
 function isLoanExtra(t){return t.type==='loanExtraLend'||t.type==='loanExtraBorrow'}
 function typeGroup(t){return ['lend','borrowed','repay','receive','loanBorrow','loanLend','loanExtraLend','loanExtraBorrow','loanAdjustment'].includes(t.type)?'loan':t.type}
 function txAmount(t){return t.type==='lend'?Number(t.gross||0):Number(t.amount||0)}

@@ -787,3 +787,26 @@ body > #mkRecurringModal > .mk-recurring-sheet {box-sizing:border-box!important;
 .mk-memo-input-heading{display:flex;align-items:center;justify-content:space-between}
 #mkMemoClear{font-size:12px;font-weight:400;color:var(--muted);background:transparent;padding:3px 2px}
 #mkMemoClear:disabled{opacity:.4}
+
+/* #61: inactive payment labels lighter weight, keep original selected palette */
+#payBtns .mini:not(.active),#otherPays .mini:not(.active){font-weight:400}
+#payBtns .mini.active,#otherPays .mini.active{font-weight:700}
+/* #61: compact record reset, kept away from main transaction tabs */
+#record .interaction-row{position:relative}
+#record .mk-record-reset{margin-left:auto;flex:none;width:37px;height:37px;display:grid;place-items:center;border:1px solid #e5d5dd;border-radius:11px;background:#fff;color:#8d6d7b;font-size:24px;font-weight:400;line-height:1}
+#record .interaction-row:has(.interaction-tabs:not(.hidden)) .mk-record-reset{order:5}
+
+/* #68: category overlay only; #61 mode/reset layout remains unchanged */
+#payBtns .mini.active,#otherPays .mini.active{border-width:1.6px}
+/* Category dropdown; no automatic page scrolling */
+
+#mkCategoryDropdown{position:fixed;z-index:85;overflow-y:auto;overscroll-behavior:contain;background:#fffdfd;border:1px solid #e4b7c9;border-radius:0 0 13px 13px;box-shadow:0 9px 22px rgba(60,30,45,.15);padding:4px 8px;scrollbar-width:thin}
+#mkCategoryDropdown .mk-category-item{display:block;width:100%;text-align:left;font-size:14px;font-weight:400;line-height:1.35;padding:8px 10px;background:transparent;border:0;border-bottom:1px solid #f0e9ed;border-radius:5px;color:#2c292a}
+#mkCategoryDropdown .mk-category-item:last-child{border-bottom:0}
+#mkCategoryDropdown .mk-category-item.is-selected{background:#fbeaf1;color:#9e5072}
+#mkCategoryDropdown .mk-category-item:active{background:#f8e2eb}
+#categoryBtn[aria-expanded="true"]{border-color:#d884a5;border-bottom-left-radius:5px;border-bottom-right-radius:5px}
+
+/* #70: touch dragging is bounded only while the record category list is open. */
+#categoryBtn[aria-expanded="true"]{touch-action:none}
+
