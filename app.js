@@ -97,7 +97,7 @@ function openPicker(title,items,cb){$('pickerTitle').textContent=title;$('picker
 function adjustBalance(){openPicker('残高を合わせる口座',Object.entries(balances).map(([k,v])=>({label:v.name,value:k})),(k,l)=>{openMoneyPrompt(l+' の実際の残高',balances[k].v,(n)=>{let d=n-balances[k].v;balances[k].v=n;cashbook.unshift({date:$('date').value,text:'残高調整：'+l,delta:d});renderAll()},{min:-999999999})})}
 function saveSnapshot(){snapshots.unshift({date:$('date').value,value:total()});$('snapshotList').innerHTML=snapshots.map(s=>`<div class="row item"><span>${s.date}</span><strong>${yen(s.value)}</strong></div>`).join('')}
 function setMode(m,b){mode=m;document.querySelectorAll('.mode-choice').forEach(x=>x.classList.remove('active'));b.classList.add('active');$('loanSections').classList.toggle('hidden',m!=='loan');$('loanGroups').classList.toggle('hidden',m!=='loan');updateForm()}function setLoanSection(sec,b){loanSection=sec;document.querySelectorAll('#loanSections .mini').forEach(x=>x.classList.remove('active'));b.classList.add('active');$('loanAdvance').classList.toggle('hidden',sec!=='advance');$('loanSettle').classList.toggle('hidden',sec!=='settle');$('loanLendBorrow').classList.toggle('hidden',sec!=='lendborrow');loanKind=sec==='advance'?'lend':sec==='settle'?'repay':'loanLend';document.querySelectorAll('.loan-detail-row').forEach(r=>r.querySelectorAll('.mini').forEach((x,i)=>x.classList.toggle('active',i===0)));updateForm()}function setLoanKind(k,b){loanKind=k;b.parentElement.querySelectorAll('.mini').forEach(x=>x.classList.remove('active'));b.classList.add('active');updateForm()}
-function updateForm(){mkRenderEventSuggestion();let lk=mode==='loan'?loanKind:'',isLoan=mode==='loan',isLend=isLoan&&lk==='lend';$('recordTopGrid').classList.toggle('loan-person-layout',isLoan);$('lendBox').classList.toggle('hidden',!isLend);$('lendPersonTop').classList.toggle('hidden',!isLend);$('personTop').classList.toggle('hidden',!(isLoan&&!isLend));$('normalAmount').classList.toggle('hidden',isLend);$('transferBox').classList.toggle('hidden',mode!=='transfer');$('transferFeeBox').classList.toggle('hidden',mode!=='transfer');$('recordFeeBox').classList.toggle('hidden',!(mode==='expense'||(mode==='loan'&&['repay','receive'].includes(lk))));$('chargeBox').classList.toggle('hidden',mode!=='charge');$('categoryField').classList.toggle('hidden',mode==='income'||mode==='transfer'||mode==='charge'||(mode==='loan'&&['repay','receive','loanBorrow','loanLend'].includes(lk)));$('paymentField').classList.toggle('hidden',mode==='transfer'||mode==='charge'||(mode==='loan'&&lk==='borrowed'));$('amountLabel').textContent=mode==='income'?'入金額':mode==='transfer'?'移動金額':mode==='charge'?'チャージ金額':mode==='loan'&&lk==='borrowed'?'自分の負担額':mode==='loan'&&lk==='repay'?'返した金額':mode==='loan'&&lk==='receive'?'返された金額':mode==='loan'&&lk==='loanBorrow'?'借りる金額':mode==='loan'&&lk==='loanLend'?'貸す金額':'金額';$('paymentLabel').textContent=mode==='income'?'入金先':mode==='loan'&&['receive','loanBorrow'].includes(lk)?'受取方法':'支払方法';renderPayBtns();renderPersonCandidates();mkRefreshRakPaySource()}
+function updateForm(){mkRenderEventSuggestion();let lk=mode==='loan'?loanKind:'',isLoan=mode==='loan',isLend=isLoan&&lk==='lend';$('recordTopGrid').classList.toggle('loan-person-layout',isLoan);$('lendBox').classList.toggle('hidden',!isLend);$('lendPersonTop').classList.toggle('hidden',!isLend);$('personTop').classList.toggle('hidden',!(isLoan&&!isLend));$('normalAmount').classList.toggle('hidden',isLend);$('transferBox').classList.toggle('hidden',mode!=='transfer');$('transferFeeBox').classList.toggle('hidden',mode!=='transfer');$('recordFeeBox').classList.toggle('hidden',!(mode==='expense'||(mode==='loan'&&['repay','receive'].includes(lk))));$('chargeBox').classList.toggle('hidden',mode!=='charge');$('categoryField').classList.toggle('hidden',mode==='income'||mode==='transfer'||mode==='charge'||(mode==='loan'&&['repay','receive','loanBorrow','loanLend'].includes(lk)));$('paymentField').classList.toggle('hidden',mode==='transfer'||mode==='charge'||(mode==='loan'&&lk==='borrowed'));$('amountLabel').textContent=mode==='income'?'入金額':mode==='transfer'?'移動金額':mode==='charge'?'チャージ金額':mode==='loan'&&lk==='borrowed'?'自分の負担額':mode==='loan'&&lk==='repay'?'返した金額':mode==='loan'&&lk==='receive'?'返された金額':mode==='loan'&&lk==='loanBorrow'?'借りる金額':mode==='loan'&&lk==='loanLend'?'貸す金額':'金額';$('paymentLabel').textContent=mode==='income'?'入金先':mode==='loan'&&['receive','loanBorrow'].includes(lk)?'受取方法':'支払方法';renderPayBtns();renderPersonCandidates();mkRefreshRakPaySource();mkCandidateRender()}
 function calcLend(src){let g=moneyNum($('gross').value),m=moneyNum($('mine').value),t=moneyNum($('theirs').value);if(src==='g'){if($('mine').value!=='')$('theirs').value=Math.max(0,g-m);else if($('theirs').value!=='')$('mine').value=Math.max(0,g-t)}if(src==='m'&&$('gross').value!=='')$('theirs').value=Math.max(0,g-m);if(src==='t'&&$('gross').value!=='')$('mine').value=Math.max(0,g-t);refreshMoneyInputs()}
 function payButton(k,label,extra=''){return `<button class="mini ${payment===k?'active':''}" ${extra||`onclick="pickPay('${k}',this)"`}>${label}</button>`}
 function renderPayBtns(){
@@ -111,14 +111,88 @@ function mkChooseRakPaySource(k){rakutenPaySource=k;mkRefreshRakPaySource()}
 function mkRefreshRakPaySource(){const box=$('mkRakPaySource');if(!box)return;box.classList.toggle('hidden',!(mode==='expense'&&payment==='rakutenpay'));$('mkRakPayCard').classList.toggle('active',rakutenPaySource==='rakuten');$('mkRakPayBank').classList.toggle('active',rakutenPaySource==='rakbank');$('mkRakPayCash').classList.toggle('active',rakutenPaySource==='rakutencash')}
 function pickPay(k,b){payment=k;document.querySelectorAll('#payBtns .mini,#otherPays .mini').forEach(x=>x.classList.remove('active'));b.classList.add('active');$('installmentField').classList.toggle('hidden',!['dcard','rakuten','epos','lumine'].includes(k));mkRefreshRakPaySource()}
 function pickInstallment(n,b){installments=n;document.querySelectorAll('#installmentField .mini').forEach(x=>x.classList.remove('active'));b.classList.add('active')}
-function pickCategory(){openPicker('カテゴリを選択',cats.map(c=>({label:c,value:c})),(v,l)=>{category=v;$('categoryBtn').firstElementChild.textContent=l})}
+function pickCategory(){openPicker('カテゴリを選択',cats.map(c=>({label:c,value:c})),(v,l)=>{category=v;$('categoryBtn').firstElementChild.textContent=l;mkCandidateRender()})}
 function pickEvent(){openPicker('特別費イベント',[{label:'なし',value:''},...eventsData.filter(e=>!e.archived).map(e=>({label:e.name,value:e.name}))],(v,l)=>{mkSetEventTag(v);$('fxBox').classList.toggle('hidden',true)})}
 let mkEventFixed={};
+// #76: memo-only event controls never assign eventTag or affect event totals.
+const mkEventMemoParts=new Map();
+let mkEventMemoPrevious='';
+let mkEventMemoSelected='';
+function mkEventMemoMode(){return mode==='loan'&&['repay','receive','loanLend','loanBorrow'].includes(loanKind)}
+// #77: a separate memo picker, unaffected by the special-expense default.
+function mkRefreshMemoEventPicker(){
+ const field=$('mkEventMemoField');if(!field)return;
+ const enabled=mkEventMemoMode();field.classList.toggle('hidden',!enabled);
+ $('mkEventTagField').classList.toggle('hidden',enabled);
+ if(!enabled)return;
+ mkSyncEventMemoParts();
+ const event=eventsData.find(e=>!e.archived&&e.id===mkEventMemoSelected);
+ if(!event)mkEventMemoSelected='';
+ $('mkEventMemoPicker').firstElementChild.textContent=event?event.name:'選んでください';
+ const added=!!event&&mkEventMemoParts.has(event.id);
+ const button=$('mkEventMemoAdd');button.innerHTML='<span class="mk-event-state">'+(added?'ON':'OFF')+'</span><span>メモ</span>';button.setAttribute('aria-pressed',String(added));
+ button.classList.toggle('active',added);button.disabled=!event;
+}
+function mkPickMemoEvent(){
+ if(!mkEventMemoMode())return;
+ openPicker('特別費イベント（メモ用）',[{label:'選んでください',value:''},...eventsData.filter(e=>!e.archived).map(e=>({label:e.name,value:e.id}))],id=>{mkEventMemoSelected=id;mkRefreshMemoEventPicker()});
+}
+function mkAddSelectedMemoEvent(){
+ if(!mkEventMemoMode())return;
+ const event=eventsData.find(e=>!e.archived&&e.id===mkEventMemoSelected);if(!event)return;
+ mkSyncEventMemoParts();
+ mkToggleEventMemo(event.id,true);
+}
+function mkEventPeriodMatches(){const d=$('date').value;return d?eventsData.filter(e=>!e.archived&&e.start&&e.end&&d>=e.start&&d<=e.end):[]}
+function mkSyncEventMemoParts(){
+ const value=$('memo').value,old=mkEventMemoPrevious;
+ if(value===old)return;
+ let start=0;while(start<old.length&&start<value.length&&old[start]===value[start])start++;
+ let oldEnd=old.length,newEnd=value.length;
+ while(oldEnd>start&&newEnd>start&&old[oldEnd-1]===value[newEnd-1]){oldEnd--;newEnd--}
+ const delta=value.length-old.length;
+ for(const [id,part] of mkEventMemoParts){
+  if(part.start<0)continue;
+  if(oldEnd<=part.start){part.start+=delta;part.end+=delta}
+  else if(start<part.end){mkEventMemoParts.delete(id)}
+ }
+ mkEventMemoPrevious=value;
+}
+function mkToggleEventMemo(id,fromPicker=false,fromCandidate=false){
+ mkCandidateSync();
+ if(!fromCandidate&&!mkEventMemoMode())return;
+ mkMemoUndo=null;mkMemoClearPaint();
+ const event=(fromPicker?eventsData.filter(e=>!e.archived):mkEventPeriodMatches()).find(e=>e.id===id);if(!event)return;
+ mkSyncEventMemoParts();
+ const memo=$('memo'),part=mkEventMemoParts.get(id);
+ if(part){
+  mkEventMemoParts.delete(id);
+  if(part.start>=0&&memo.value.slice(part.start,part.end)===part.text){
+   memo.value=memo.value.slice(0,part.start)+memo.value.slice(part.end);
+   mkSyncEventMemoParts();
+  }
+ }else if(memo.value.includes(event.name)){
+  // An existing user-written name is never owned or deleted by this control.
+  mkEventMemoParts.set(id,{start:-1,end:-1,text:''});
+ }else{
+  const start=memo.value.length,text=(start?' ':'')+event.name;
+  memo.value+=text;mkEventMemoPrevious=memo.value;
+  mkEventMemoParts.set(id,{start,end:start+text.length,text});
+ }
+ mkEventMemoPrevious=memo.value;mkCandidateSync();mkCandidateCleanStart();mkCandidatePaint();mkRenderEventSuggestion();mkMemoClearPaint();if(!part)mkMemoShowEnd();
+}
+function mkRenderEventMemo(box){
+ mkSyncEventMemoParts();
+ const hits=mkEventPeriodMatches();box.classList.toggle('hidden',!hits.length);
+ box.innerHTML=hits.map((e,i)=>{const on=mkEventMemoParts.has(e.id);return `<div class="mk-event-suggest-card mk-event-memo-card"><div class="mk-event-suggest-top"><span>🌟特別費イベント期間中</span></div><div class="mk-event-memo-note">この項目は特別費の記録・集計には入りません。</div><div class="mk-event-name-row"><button type="button" class="mk-event-name-toggle mk-event-memo-toggle ${on?'active':''}" data-memo-event="${i}" aria-pressed="${on}"><span class="mk-event-state">${on?'ON':'OFF'}</span><span class="mk-event-name-text">メモ：${safeHtml(e.name)}</span></button></div></div>`}).join('');
+ box.querySelectorAll('[data-memo-event]').forEach(button=>button.addEventListener('click',()=>mkToggleEventMemo(hits[Number(button.dataset.memoEvent)].id)));
+}
+$('memo').addEventListener('input',()=>{mkSyncEventMemoParts();if(mkEventMemoMode())mkRenderEventSuggestion()});
 function mkEventMatches(){const d=$('date').value;return (mode==='expense'||(mode==='loan'&&['lend','borrowed'].includes(loanKind)))&&d?eventsData.filter(e=>!e.archived&&e.start&&e.end&&d>=e.start&&d<=e.end):[]}
 function mkSetEventTag(name){eventTag=name;$('eventBtn').firstElementChild.textContent=name||'なし';mkRenderEventSuggestion()}
 function mkToggleSuggestedEvent(id){const e=eventsData.find(x=>x.id===id);if(e)mkSetEventTag(eventTag===e.name?'':e.name)}
 function mkToggleEventFixed(id){mkEventFixed[id]=!mkEventFixed[id];mkQueueSave();mkRenderEventSuggestion()}
-function mkRenderEventSuggestion(){const box=$('mkEventSuggestion');if(!box)return;const hits=mkEventMatches();if(!hits.length){box.classList.add('hidden');return}box.classList.remove('hidden');box.innerHTML=hits.map(e=>{const on=eventTag===e.name;return `<div class="mk-event-suggest-card"><div class="mk-event-suggest-top"><span>🌟特別費イベント期間中</span><button type="button" class="mk-event-fixed ${mkEventFixed[e.id]?'active':''}" onclick="mkToggleEventFixed('${e.id}')" aria-pressed="${!!mkEventFixed[e.id]}">ONで固定</button></div><div class="mk-event-name-row"><button type="button" class="mk-event-name-toggle ${on?'active':''}" onclick="mkToggleSuggestedEvent('${e.id}')" aria-pressed="${on}"><span class="mk-event-state">${on?'ON':'OFF'}</span><span class="mk-event-name-text">${safeHtml(e.name)}</span></button></div></div>`}).join('')}
+function mkRenderEventSuggestion(){mkRefreshMemoEventPicker();const box=$('mkEventSuggestion');if(!box)return;if(mkEventMemoMode()){mkRenderEventMemo(box);return}const hits=mkEventMatches();if(!hits.length){box.classList.add('hidden');return}box.classList.remove('hidden');box.innerHTML=hits.map(e=>{const on=eventTag===e.name;return `<div class="mk-event-suggest-card"><div class="mk-event-suggest-top"><span>🌟特別費イベント期間中</span><button type="button" class="mk-event-fixed ${mkEventFixed[e.id]?'active':''}" onclick="mkToggleEventFixed('${e.id}')" aria-pressed="${!!mkEventFixed[e.id]}">ONで固定</button></div><div class="mk-event-name-row"><button type="button" class="mk-event-name-toggle ${on?'active':''}" onclick="mkToggleSuggestedEvent('${e.id}')" aria-pressed="${on}"><span class="mk-event-state">${on?'ON':'OFF'}</span><span class="mk-event-name-text">${safeHtml(e.name)}</span></button></div></div>`}).join('')}
 
 function autoTagEvent(){const hits=mkEventMatches();if(eventTag&&!hits.some(e=>e.name===eventTag))mkSetEventTag('');else mkRenderEventSuggestion()}
 function mkDefaultEventTag(){const fixed=mkEventMatches().find(e=>mkEventFixed[e.id]);mkSetEventTag(fixed?fixed.name:'')}
@@ -135,7 +209,7 @@ function pickDiscount(v,b){discount=v;document.querySelectorAll('#discountBtns .
 function setTransferFeeSide(side,b){transferFeeSide=side;document.querySelectorAll('#transferFeePayer .mini').forEach(x=>x.classList.remove('active'));if(b)b.classList.add('active')}
 function toggleTransferFeePayer(){let fee=moneyNum($('transferFee').value);$('transferFeePayer').classList.toggle('hidden',fee<=0)}
 function saveRecord(){let d=$('date').value,a=moneyNum($('amount').value),memo=$('memo').value.trim(),pts=Number($('points').value||0),dc=disc(),txid='tx'+Date.now()+Math.random().toString(36).slice(2,7);$('recordError').textContent='';if(mode==='expense'){if(a<=0||!category||!payment)return err('金額・カテゴリ・支払方法を確認してね');let fee=moneyNum($('recordFee').value);if(fee<0)return err('手数料は0円以上にしてね');let paid=Math.max(0,a-pts),billed=Math.round(paid*(1-dc/100))+fee;if(payment==='rakutenpay'&&rakutenPaySource==='rakutencash'&&balances.rakutencash.v<paid+fee)return err('楽天Pay残高が不足しています。ホームの「残高を合わせる」で残高を確認してね');let t={id:txid,date:d,type:'expense',amount:a,paid,billed,fee,category,payment,memo,points:pts,discount:dc,eventTag,installments, ...(payment==='rakutenpay'?{rakutenPaySource}: {})};txs.unshift(t);const payAccount=payment==='rakutenpay'?rakutenPaySource:payment;if(acct(payAccount))move(d,category+(memo?'・'+memo:''),-(paid+fee),payAccount,txid)}else if(mode==='income'){if(a<=0||!payment)return err('入金額と入金先を確認してね');let t={id:txid,date:d,type:'income',amount:a,payment,memo};txs.unshift(t);if(acct(payment))move(d,'入金'+(memo?'・'+memo:''),a,payment,txid)}else if(mode==='transfer'){let fee=moneyNum($('transferFee').value),feeSide=fee>0?transferFeeSide:'from';if(a<=0||!from||!to||from===to||fee<0)return err('金額・移動元・移動先・手数料を確認してね');if(fee>0&&feeSide==='to'&&a<=fee)return err('移動先から手数料を引く場合は、移動金額より小さい手数料にしてね');let t={id:txid,date:d,type:'transfer',amount:a,fee,feeSide,from,to};txs.unshift(t);if(feeSide==='to'){balances[from].v-=a;balances[to].v+=a-fee}else{balances[from].v-=a+fee;balances[to].v+=a}if(fee>0)cashbook.unshift({date:d,text:'振込手数料',delta:-fee,refId:txid})}else if(mode==='charge'){if(a<=0||!chargeTarget||!chargeSource)return err('金額・チャージ先・チャージ元を確認してね');let t={id:txid,date:d,type:'charge',amount:a,target:chargeTarget,source:chargeSource,billed:Math.round(a*(1-dc/100)),discount:dc};txs.unshift(t);balances[chargeTarget].v+=a;if(acct(chargeSource)){balances[chargeSource].v-=a}else{cashbook.unshift({date:d,text:(pays.find(x=>x[0]===chargeSource)||['',chargeSource])[1]+'→'+balances[chargeTarget].name+'チャージ',delta:a,refId:txid})}}else if(mode==='loan'){if(loanKind==='lend'){let g=moneyNum($('gross').value),m=moneyNum($('mine').value),t=moneyNum($('theirs').value),p=$('lendPerson').value.trim();if(g<=0||t<=0||Math.round(m+t)!==Math.round(g)||!p||!category||!payment)return err('立替の入力を確認してね');lastSavedLoanPerson=p;let tx={id:txid,date:d,type:'lend',amount:m,gross:g,category,payment,person:p,other:t,memo,eventTag};txs.unshift(tx);if(acct(payment))move(d,category+'（'+p+'分を立替）',-g,payment,txid)}else{let p=$('person').value.trim();if(a<=0||!p)return err('金額と相手を確認してね');lastSavedLoanPerson=p;let fee=['repay','receive'].includes(loanKind)?moneyNum($('recordFee').value):0;if(fee<0)return err('手数料は0円以上にしてね');if(loanKind==='borrowed'){if(!category)return err('カテゴリを選んでね');txs.unshift({id:txid,date:d,type:'borrowed',amount:a,category,person:p,memo,eventTag})}else{if(!payment)return err('支払・受取方法を選んでね');let tx={id:txid,date:d,type:loanKind,amount:a,fee,person:p,payment,memo};txs.unshift(tx);if(acct(payment)){if(loanKind==='repay')move(d,p+'へ返済',-(a+fee),payment,txid);if(loanKind==='receive')move(d,p+'から返済',a-fee,payment,txid);if(loanKind==='loanBorrow')move(d,p+'から借入',a,payment,txid);if(loanKind==='loanLend')move(d,p+'へ貸付',-a,payment,txid)}}}}if(mode==='loan')reviveArchivedLoanPersonOnNewRecord(lastSavedLoanPerson);renderAll();$('goLoansBtn').classList.toggle('hidden',mode!=='loan');$('savedModal').classList.remove('hidden')}
-function err(s){$('recordError').textContent=s}function continueRecord(){$('savedModal').classList.add('hidden');clearFields();scrollTo(0,0)}function goHistory(){$('savedModal').classList.add('hidden');clearFields();nav('history',document.querySelectorAll('.nav')[2])}function goLoans(){$('savedModal').classList.add('hidden');if(lastSavedLoanPerson){loanActivePerson=lastSavedLoanPerson;loanExpandedPerson=lastSavedLoanPerson}loanArchiveView=false;loanOrganize=false;loanAddToGroupId='';loanSelectedIds.clear();clearFields();openOther('loans');renderLoans()}function clearFields(){['amount','gross','mine','theirs','lendPerson','person','memo','points','customDiscount','nzd','transferFee','recordFee'].forEach(id=>{if($(id))$(id).value=''});category='';eventTag='';payment='';rakutenPaySource='rakuten';mkRefreshRakPaySource();$('categoryBtn').firstElementChild.textContent='選んでください';$('eventBtn').firstElementChild.textContent='なし';$('optionalInner').classList.add('hidden');if($('optionalMark'))$('optionalMark').textContent='＋';$('otherPays').classList.add('hidden');$('fxBox').classList.add('hidden');mkDefaultEventTag()}
+function err(s){$('recordError').textContent=s}function continueRecord(){$('savedModal').classList.add('hidden');clearFields();scrollTo(0,0)}function goHistory(){$('savedModal').classList.add('hidden');clearFields();nav('history',document.querySelectorAll('.nav')[2])}function goLoans(){$('savedModal').classList.add('hidden');if(lastSavedLoanPerson){loanActivePerson=lastSavedLoanPerson;loanExpandedPerson=lastSavedLoanPerson}loanArchiveView=false;loanOrganize=false;loanAddToGroupId='';loanSelectedIds.clear();clearFields();openOther('loans');renderLoans()}function clearFields(){mkEventMemoSelected='';mkEventMemoParts.clear();mkEventMemoPrevious='';['amount','gross','mine','theirs','lendPerson','person','memo','points','customDiscount','nzd','transferFee','recordFee'].forEach(id=>{if($(id))$(id).value=''});category='';eventTag='';payment='';rakutenPaySource='rakuten';mkRefreshRakPaySource();$('categoryBtn').firstElementChild.textContent='選んでください';$('eventBtn').firstElementChild.textContent='なし';$('optionalInner').classList.add('hidden');if($('optionalMark'))$('optionalMark').textContent='＋';$('otherPays').classList.add('hidden');$('fxBox').classList.add('hidden');mkDefaultEventTag();mkCandidateReset()}
 function isLoanExtra(t){return t.type==='loanExtraLend'||t.type==='loanExtraBorrow'}
 function typeGroup(t){return ['lend','borrowed','repay','receive','loanBorrow','loanLend','loanExtraLend','loanExtraBorrow','loanAdjustment'].includes(t.type)?'loan':t.type}
 function txAmount(t){return t.type==='lend'?Number(t.gross||0):Number(t.amount||0)}
@@ -842,7 +916,7 @@ function mkLoanTodoFromButton(btn){
  renderAll();
 }
 
-// #79 Memo vocabulary management. No record-entry integration in this version.
+// Memo management shared by Other and the record candidate picker.
 let mkMemoData={groups:[],words:[]};
 let mkMemoView='words',mkMemoScope='',mkMemoEdit=null,mkMemoDuplicate='',mkMemoDrag=null;
 function mkMemoValidate(data){return MKMigrations.validateMemo(data)}
@@ -853,7 +927,7 @@ function mkMemoOpen(origin='other'){mkMemoOrigin=origin;mkMemoScope='';mkMemoVie
 function mkMemoTab(view){if(view===mkMemoView&&!mkMemoScope)return;if(view==='words'){if(mkMemoView!=='words')history.go(mkMemoScope?-2:-1);return}const replace=mkMemoView!=='words'&&!mkMemoScope;mkMemoView=view;mkMemoScope='';mkMemoRender();mkMemoHistory(replace)}
 function mkMemoEnter(index){mkMemoScope=mkMemoView==='groups'?mkMemoData.groups[index].id:cats[index];mkMemoRender();mkMemoHistory()}
 function mkMemoRows(){return mkMemoScope?mkMemoData.words.filter(w=>mkMemoView==='groups'?w.group===mkMemoScope:w.cats.includes(mkMemoScope)):mkMemoView==='words'?[...mkMemoData.words]:[...mkMemoData.groups]}
-function mkMemoPersist(){mkQueueSave();mkMemoRender()}
+function mkMemoPersist(){mkQueueSave();mkMemoRender();mkCandidateRender()}
 function mkMemoScrollStrip(texts,className){
  const strip=document.createElement('div');strip.className='mk-memo-strip '+className;
  strip.setAttribute('aria-label',className==='mk-memo-category-strip'?'関連カテゴリ':'登録済みの言葉');strip.tabIndex=0;
@@ -956,6 +1030,91 @@ function mkMemoDragEnd(){mkMemoDragFinish(true)}function mkMemoDragCancel(){mkMe
 function mkMemoDragFinish(save){const d=mkMemoDrag;if(!d)return;mkMemoDrag=null;clearTimeout(d.timer);cancelAnimationFrame(d.raf);d.grip.removeEventListener('pointermove',mkMemoDragMove);d.grip.removeEventListener('pointerup',mkMemoDragEnd);d.grip.removeEventListener('pointercancel',mkMemoDragCancel);d.grip.removeEventListener('lostpointercapture',mkMemoDragCancel);d.ghost?.remove();d.row.classList.remove('mk-memo-placeholder');if(d.grip.hasPointerCapture(d.id))d.grip.releasePointerCapture(d.id);
  if(d.active&&save){const visible=mkMemoRows(),from=visible.findIndex(x=>x.id===d.row.dataset.id),to=[...$('mkMemoRows').children].indexOf(d.row);mkMemoReorder(from,to)}mkMemoRender();
 }
+
+
+// #85 Clear only the memo draft, with a one-step undo.
+let mkMemoUndo=null;
+function mkMemoClearPaint(){const b=$('mkMemoClear');b.textContent=mkMemoUndo?'元に戻す':'クリア';b.disabled=!mkMemoUndo&&!$('memo').value}
+function mkMemoShowEnd(){requestAnimationFrame(()=>{$('memo').scrollLeft=$('memo').scrollWidth})}
+function mkMemoClear(){
+ const memo=$('memo');mkCandidateSync();mkSyncEventMemoParts();
+ if(mkMemoUndo){
+  const saved=mkMemoUndo;mkMemoUndo=null;memo.value=saved.value;
+  mkCandidateParts.clear();saved.words.forEach(([id,p])=>mkCandidateParts.set(id,{...p}));
+  mkEventMemoParts.clear();saved.events.forEach(([id,p])=>mkEventMemoParts.set(id,{...p}));
+  mkCandidatePrevious=memo.value;mkEventMemoPrevious=memo.value;
+  requestAnimationFrame(()=>{memo.scrollLeft=saved.scroll});
+ }else if(memo.value){
+  mkMemoUndo={value:memo.value,scroll:memo.scrollLeft,words:[...mkCandidateParts].map(([id,p])=>[id,{...p}]),events:[...mkEventMemoParts].map(([id,p])=>[id,{...p}])};
+  memo.value='';mkCandidateParts.clear();mkEventMemoParts.clear();mkCandidatePrevious='';mkEventMemoPrevious='';
+ }
+ mkCandidateBefore=null;mkCandidatePaint();mkRenderEventSuggestion();mkMemoClearPaint();
+}
+
+// #83 Inline memo vocabulary picker. Ownership is local to the current draft.
+let mkCandidateOpen=false,mkCandidateTab='',mkCandidateCategory='',mkCandidatePrevious='',mkCandidateBefore=null,mkCandidateGesture=null,mkCandidateIgnoreClick=0;
+const mkCandidateParts=new Map();
+function mkCandidateCurrentCategory(){return mode==='expense'||(mode==='loan'&&['lend','borrowed'].includes(loanKind))?category:''}
+function mkCandidateTabs(){const c=mkCandidateCurrentCategory(),related=!!c&&mkMemoData.words.some(w=>w.cats.includes(c));return [...(related?[{id:'__related',name:'関連'}]:[]),...mkMemoData.groups,{id:'__events',name:'特別費'}]}
+function mkCandidateWords(){if(mkCandidateTab==='__events')return eventsData.filter(e=>!e.archived).map(e=>({id:e.id,text:e.name,event:true}));if(mkCandidateTab==='__related'){const c=mkCandidateCurrentCategory();return mkMemoData.groups.flatMap(g=>mkMemoData.words.filter(w=>w.group===g.id&&w.cats.includes(c)))}return mkMemoData.words.filter(w=>w.group===mkCandidateTab)}
+function mkCandidateToggle(){mkCandidateOpen=!mkCandidateOpen;if(mkCandidateOpen){$('memo').blur();mkCandidateTab='';mkCandidateSync()}mkCandidateRender()}
+function mkCandidateRender(){
+ const toggle=$('mkCandidateToggle');if(!toggle)return;$('mkCandidateManage').hidden=!mkCandidateOpen;
+ toggle.textContent=mkCandidateOpen?'候補を閉じる −':'候補から選ぶ ＋';toggle.setAttribute('aria-expanded',String(mkCandidateOpen));$('mkCandidatePanel').hidden=!mkCandidateOpen;
+ if(!mkCandidateOpen)return;
+ const tabs=mkCandidateTabs(),c=mkCandidateCurrentCategory();if(c!==mkCandidateCategory||!tabs.some(t=>t.id===mkCandidateTab)){mkCandidateTab=tabs[0]?.id||'';mkCandidateCategory=c}
+ const tabBox=$('mkCandidateTabs');tabBox.innerHTML='';
+ tabs.forEach((t,i)=>{const b=document.createElement('button');b.type='button';b.className='mk-candidate-tab';b.id='mkCandidateTab'+i;b.textContent=t.name;b.dataset.tab=t.id;b.setAttribute('role','tab');b.setAttribute('aria-selected',String(t.id===mkCandidateTab));b.setAttribute('aria-controls','mkCandidateWords');b.tabIndex=t.id===mkCandidateTab?0:-1;b.onclick=()=>mkCandidateChooseTab(t.id);b.onkeydown=e=>{if(['ArrowLeft','ArrowRight','Home','End'].includes(e.key)){e.preventDefault();let n=e.key==='Home'?0:e.key==='End'?tabs.length-1:Math.max(0,Math.min(tabs.length-1,i+(e.key==='ArrowRight'?1:-1)));mkCandidateChooseTab(tabs[n].id);$('mkCandidateTabs').children[n].focus({preventScroll:true})}};tabBox.append(b)});
+ const list=$('mkCandidateWords');list.innerHTML='';const activeIndex=tabs.findIndex(t=>t.id===mkCandidateTab);if(activeIndex>=0)list.setAttribute('aria-labelledby','mkCandidateTab'+activeIndex);else list.removeAttribute('aria-labelledby');
+ const words=mkCandidateWords();words.forEach(w=>{const b=document.createElement('button');b.type='button';b.className='mk-candidate-word';b.textContent=w.text;b.dataset.word=w.id;if(w.event)b.dataset.event='true';b.setAttribute('aria-pressed',String((w.event?mkEventMemoParts:mkCandidateParts).has(w.id)));b.onclick=()=>{if(performance.now()>=mkCandidateIgnoreClick){if(w.event)mkToggleEventMemo(w.id,true,true);else mkCandidateToggleWord(w.id)}};list.append(b)});
+ if(!words.length){const empty=document.createElement('div');empty.className='mk-candidate-empty';empty.textContent=mkCandidateTab==='__events'?'表示できる特別費イベントがありません。':mkMemoData.words.length?'この分類には言葉がありません。':'「その他 → メモ」で言葉を登録できます。';list.append(empty)}
+ requestAnimationFrame(()=>{const b=tabBox.querySelector('[aria-selected="true"]');if(b){const left=b.offsetLeft-tabBox.offsetLeft;if(left<tabBox.scrollLeft)tabBox.scrollLeft=left;else if(left+b.offsetWidth>tabBox.scrollLeft+tabBox.clientWidth)tabBox.scrollLeft=left+b.offsetWidth-tabBox.clientWidth}});
+}
+function mkCandidateChooseTab(id){if(id===mkCandidateTab)return;mkCandidateTab=id;mkCandidateRender();$('mkCandidateWords').scrollTop=0}
+function mkCandidatePaint(){document.querySelectorAll('#mkCandidateWords [data-word]').forEach(b=>b.setAttribute('aria-pressed',String((b.dataset.event?mkEventMemoParts:mkCandidateParts).has(b.dataset.word))))}
+function mkCandidateMoveParts(parts,start,end,replacement,value){
+ const delta=replacement.length-(end-start);
+ for(const [id,p] of parts){if(p.start<0)continue;if(p.end<=start)continue;if(p.start>=end){p.start+=delta;p.end+=delta;continue}
+  // Preserve an event marker if only its generated leading space was removed.
+  if(!replacement&&p.text.startsWith(' ')&&start<=p.start&&end===p.start+1){p.start=start;p.end+=delta;p.text=p.text.slice(1);continue}
+  parts.delete(id);
+ }
+ for(const [id,p] of parts)if(p.start>=0&&value.slice(p.start,p.end)!==p.text)parts.delete(id);
+}
+function mkCandidateSync(){
+ const value=$('memo').value,old=mkCandidatePrevious;if(value===old){mkCandidateBefore=null;return}
+ let start=0;while(start<old.length&&start<value.length&&old[start]===value[start])start++;
+ let end=old.length,newEnd=value.length;while(end>start&&newEnd>start&&old[end-1]===value[newEnd-1]){end--;newEnd--}
+ const before=mkCandidateBefore;mkCandidateBefore=null;
+ if(before?.value===old&&before.end>before.start){const length=value.length-(old.length-(before.end-before.start));if(length>=0&&value.slice(0,before.start)===old.slice(0,before.start)&&value.slice(before.start+length)===old.slice(before.end)){start=before.start;end=before.end;newEnd=start+length}}
+ mkCandidateMoveParts(mkCandidateParts,start,end,value.slice(start,newEnd),value);mkCandidatePrevious=value;
+}
+function mkCandidateReplace(start,end,text){
+ mkSyncEventMemoParts();const memo=$('memo'),value=memo.value.slice(0,start)+text+memo.value.slice(end);
+ mkCandidateMoveParts(mkCandidateParts,start,end,text,value);mkCandidateMoveParts(mkEventMemoParts,start,end,text,value);
+ memo.value=value;mkCandidatePrevious=value;mkEventMemoPrevious=value;mkCandidateBefore=null;
+}
+function mkCandidateCleanStart(){const memo=$('memo');if(!memo.value.startsWith(' '))return;const next=[...mkCandidateParts.values()].find(p=>p.owned&&p.prefix&&p.start===1);if(next){mkCandidateReplace(0,1,'');next.prefix=false}}
+function mkCandidateToggleWord(id){
+ mkMemoUndo=null;mkCandidateSync();const w=mkMemoData.words.find(w=>w.id===id);if(!w)return;const memo=$('memo'),part=mkCandidateParts.get(id);
+ if(part){mkCandidateParts.delete(id);if(part.owned&&memo.value.slice(part.start,part.end)===part.text){const start=part.prefix&&memo.value[part.start-1]===' '?part.start-1:part.start;mkCandidateReplace(start,part.end,'');mkCandidateCleanStart()}}
+ else{
+  // Reuse an exact, standalone manually entered word without claiming its text.
+  let at=memo.value.indexOf(w.text);while(at>=0&&((at>0&&!/\s/.test(memo.value[at-1]))||(at+w.text.length<memo.value.length&&!/\s/.test(memo.value[at+w.text.length]))))at=memo.value.indexOf(w.text,at+1);
+  if(at>=0)mkCandidateParts.set(id,{start:at,end:at+w.text.length,text:w.text,owned:false,prefix:false});
+  else{const prefix=!!memo.value&&!/\s$/.test(memo.value),start=memo.value.length+(prefix?1:0);mkCandidateReplace(memo.value.length,memo.value.length,(prefix?' ':'')+w.text);mkCandidateParts.set(id,{start,end:start+w.text.length,text:w.text,owned:true,prefix})}
+ }
+ mkCandidatePaint();mkRenderEventSuggestion();mkMemoClearPaint();if(!part)mkMemoShowEnd();
+}
+function mkCandidateReset(){mkMemoUndo=null;mkMemoClearPaint();mkCandidateParts.clear();mkCandidatePrevious=$('memo').value;mkCandidateBefore=null;mkCandidateOpen=false;mkCandidateTab='';mkCandidateCategory='';mkCandidateGesture=null;mkCandidateIgnoreClick=0;mkCandidateRender()}
+$('memo').addEventListener('beforeinput',()=>{mkCandidateBefore={value:$('memo').value,start:$('memo').selectionStart,end:$('memo').selectionEnd}});
+$('memo').addEventListener('input',()=>{mkMemoUndo=null;mkCandidateSync();mkCandidatePaint();mkMemoClearPaint()});
+const mkCandidateArea=$('mkCandidateWords');
+mkCandidateArea.addEventListener('pointerdown',e=>{if(!e.isPrimary||e.button!==0)return;mkCandidateGesture={id:e.pointerId,x:e.clientX,y:e.clientY,axis:'',dx:0,moved:false};});
+mkCandidateArea.addEventListener('pointermove',e=>{const g=mkCandidateGesture;if(!g||g.id!==e.pointerId)return;const dx=e.clientX-g.x,dy=e.clientY-g.y;g.dx=dx;if(Math.hypot(dx,dy)>9)g.moved=true;if(!g.axis&&Math.max(Math.abs(dx),Math.abs(dy))>12)g.axis=Math.abs(dx)>Math.abs(dy)*1.3?'x':'y';if(g.axis==='x'){e.preventDefault();if(!mkCandidateArea.hasPointerCapture(e.pointerId))mkCandidateArea.setPointerCapture(e.pointerId)}});
+function mkCandidateEndGesture(e,cancel=false){const g=mkCandidateGesture;if(!g||g.id!==e.pointerId)return;mkCandidateGesture=null;if(g.moved||cancel)mkCandidateIgnoreClick=performance.now()+400;if(!cancel&&g.axis==='x'&&Math.abs(g.dx)>=40){const tabs=mkCandidateTabs(),i=tabs.findIndex(t=>t.id===mkCandidateTab),next=i+(g.dx<0?1:-1);if(next>=0&&next<tabs.length)mkCandidateChooseTab(tabs[next].id)}if(mkCandidateArea.hasPointerCapture(e.pointerId))mkCandidateArea.releasePointerCapture(e.pointerId)}
+mkCandidateArea.addEventListener('pointerup',e=>mkCandidateEndGesture(e));mkCandidateArea.addEventListener('pointercancel',e=>mkCandidateEndGesture(e,true));mkCandidateArea.addEventListener('lostpointercapture',e=>mkCandidateEndGesture(e,true));
+mkCandidateArea.addEventListener('click',e=>{if(performance.now()<mkCandidateIgnoreClick){e.preventDefault();e.stopImmediatePropagation()}},true);
 
 
 function mkState(){return {

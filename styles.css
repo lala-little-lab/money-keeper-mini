@@ -741,3 +741,49 @@ body > #mkRecurringModal > .mk-recurring-sheet {box-sizing:border-box!important;
 /* mini 04: keep native date controls within the event form on narrow screens. */
 #eventForm .grid2 > .field{min-width:0}
 #eventForm input[type="date"]{min-width:0;max-width:100%;width:100%;box-sizing:border-box}
+
+/* #76: memo-only event card, same toggle height and right alignment. */
+.mk-event-memo-card .mk-event-suggest-top{grid-template-columns:minmax(0,1fr)}
+.mk-event-memo-note{font-size:11px;color:#766773;line-height:1.45;margin-bottom:6px}
+.mk-event-name-toggle.mk-event-memo-toggle{width:max-content;min-width:72%;max-width:100%;flex-shrink:1;box-sizing:border-box}
+.mk-event-memo-toggle .mk-event-name-text{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;overflow-wrap:normal}
+
+/* #77: memo picker plus the same mini-button style as discount choices. */
+.mk-event-memo-picker-row{display:flex;align-items:center;gap:8px;min-width:0}
+.mk-event-memo-picker-row .picker{flex:1;min-width:0;width:auto}
+.mk-event-memo-picker-row .picker span:first-child{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mk-event-memo-picker-row .picker span:last-child{flex:none}
+.mk-event-memo-picker-row .mini{flex:none;white-space:nowrap}
+.mk-event-memo-picker-row .mini:disabled{opacity:.45;cursor:default}
+
+/* #78: compact ON/OFF memo switch, matching the period card. */
+#mkEventMemoAdd{display:inline-flex;align-items:center;justify-content:center;gap:4px;width:72px;height:37px;padding:0 5px;background:#fff;border:1px solid #ded9dd;color:#292529;font-size:12px}
+#mkEventMemoAdd.active{background:#fff;border-color:#d66c98}
+#mkEventMemoAdd .mk-event-state{min-width:0;width:29px;padding:3px 0;font-size:9px;box-sizing:border-box}
+#mkEventMemoAdd.active .mk-event-state{background:#c76f94;color:#fff}
+
+
+/* #83 Inline, compact memo candidates. Only the vocabulary panel scrolls. */
+.mk-candidate-toggle{display:block;width:100%;padding:7px 2px;margin-top:3px;background:transparent;color:var(--muted);font-size:12px;font-weight:400;text-align:left}
+.mk-candidate-panel{border:1px solid var(--line);border-radius:12px;padding:7px;background:#fffafc;overflow:hidden}
+.mk-candidate-panel[hidden]{display:none!important}
+#mkCandidateTabs{display:flex;gap:5px;overflow-x:auto;white-space:nowrap;padding-bottom:6px;scrollbar-width:none;overscroll-behavior-x:contain}
+#mkCandidateTabs::-webkit-scrollbar{display:none}
+.mk-candidate-tab{flex:none;padding:6px 9px;min-height:30px;font-size:12px;font-weight:400;background:#f7f2f5;border:1px solid var(--line);border-radius:9px;color:var(--text)}
+.mk-candidate-tab[aria-selected="true"]{background:var(--soft);border-color:#d8afc1;color:#9f5777}
+#mkCandidateWords{height:156px;overflow-y:auto;overflow-x:hidden;display:flex;flex-wrap:wrap;gap:5px;align-content:flex-start;padding:3px 1px;touch-action:pan-y;overscroll-behavior-y:contain;user-select:none;-webkit-user-select:none}
+.mk-candidate-word{max-width:100%;flex:none;min-height:32px;padding:6px 9px;font-size:12px;font-weight:400;line-height:1.4;border:1px solid var(--line);border-radius:9px;background:white;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;touch-action:pan-y}
+.mk-candidate-word[aria-pressed="true"]{background:var(--soft);border-color:var(--accent);color:#9f5777}
+.mk-candidate-empty{font-size:11px;color:var(--muted);padding:8px 3px}
+
+/* #84 Memo picker controls and right-side reorder handles */
+.mk-candidate-controls{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.mk-candidate-controls .mk-candidate-toggle{width:auto;flex:none}
+#mkCandidateToggle{margin-left:auto;text-align:right}
+#mkCandidateManage[hidden]{display:none}
+
+/* #85 Memo input helpers */
+#mkCandidateManage{margin-left:1em}
+.mk-memo-input-heading{display:flex;align-items:center;justify-content:space-between}
+#mkMemoClear{font-size:12px;font-weight:400;color:var(--muted);background:transparent;padding:3px 2px}
+#mkMemoClear:disabled{opacity:.4}
