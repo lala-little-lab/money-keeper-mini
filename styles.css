@@ -810,3 +810,18 @@ body > #mkRecurringModal > .mk-recurring-sheet {box-sizing:border-box!important;
 /* #70: touch dragging is bounded only while the record category list is open. */
 #categoryBtn[aria-expanded="true"]{touch-action:none}
 
+
+/* #07 memo-only import; existing #85 memo screens remain intact. */
+.mk-memo-import{margin-top:12px;overflow-wrap:anywhere}
+.mk-memo-import summary{font-weight:700;cursor:pointer}
+.mk-memo-import input{display:block;max-width:100%;width:100%;box-sizing:border-box;margin:10px 0}
+.mk-memo-import button{width:100%}
+.mk-memo-import-dialog{box-sizing:border-box;width:calc(100% - 32px);max-width:520px;max-height:calc(100dvh - 32px);overflow:auto;border:1px solid #e5dfe3;border-radius:20px;padding:20px;color:#222;background:#fffafb;overflow-wrap:anywhere}
+.mk-memo-import-dialog::backdrop{background:rgba(0,0,0,.35)}
+.mk-memo-import-dialog h2{font-size:19px;margin:0 0 12px}
+.mk-memo-import-dialog ul{padding-left:22px;max-height:36dvh;overflow:auto}
+.mk-memo-import-dialog li{margin:8px 0;font-size:14px}
+.mk-memo-import-dialog .row>button{flex:1;min-width:0}
+
+.mk-memo-import-dialog .row>button{width:auto}
+.mk-memo-import-dialog button:disabled{opacity:.5;cursor:default}

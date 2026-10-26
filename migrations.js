@@ -1,6 +1,18 @@
 /* Mini business-data migration; encrypted envelope remains version 1. */
 const MKMigrations={
- currentVersion:3,
+ currentVersion:4,
+  renameCategories(data){
+    const aliases={'化粧品・ボディケア・ネイル':'化粧品・ケア品','化粧品・ボディケア品':'化粧品・ケア品','化粧品・ボディケア':'化粧品・ケア品','服・靴・バッグ・アクセサリー':'服・靴・小物'};
+    const name=x=>Object.hasOwn(aliases,x)?aliases[x]:x;
+    const keys=obj=>{if(!obj||typeof obj!=='object'||Array.isArray(obj))return;for(const old of Object.keys(obj)){const next=name(old);if(next!==old){if(Object.hasOwn(obj,next)&&obj[next]!==obj[old])throw Error('旧名称と新名称の予算が重複しています：'+old+'／'+next+'。保存データは変更していません。');if(!Object.hasOwn(obj,next))obj[next]=obj[old];delete obj[old]}}};
+    for(const key of ['txs','recurring','loans','cashbook'])if(Array.isArray(data[key]))for(const row of data[key])if(row&&typeof row.category==='string')row.category=name(row.category);
+    keys(data.categoryBudgets);
+    if(data.categoryBudgetHistory)Object.values(data.categoryBudgetHistory).forEach(keys);
+    if(Array.isArray(data.eventsData))for(const event of data.eventsData){keys(event.catBudgets);if(Array.isArray(event.selectedCats))event.selectedCats=[...new Set(event.selectedCats.map(name))]}
+    if(Array.isArray(data.mkMemoData?.words))for(const word of data.mkMemoData.words)if(Array.isArray(word.cats))word.cats=[...new Set(word.cats.map(name))];
+    return data;
+  },
+
  validateMemo(data){
  if(!data||!Array.isArray(data.groups)||!Array.isArray(data.words))throw Error('メモリストの形式が正しくありません。');
  const ids=new Set(),names=new Set();
@@ -32,11 +44,11 @@ const MKMigrations={
    if(!Array.isArray(e.selectedCats)||e.selectedCats.some(c=>typeof c!=='string'))throw Error('特別費のカテゴリ設定が正しくありません。');
   }
   data.miniSchemaVersion=this.currentVersion;
-  return data;
+  return this.renameCategories(data);
  },
  upgrade(envelope){
   if(!envelope||typeof envelope!=='object'||!Number.isInteger(envelope.schemaVersion))throw Error('Unversioned database');
-  if(![1,2,3].includes(envelope.schemaVersion))throw Error('Unsupported data version');
-  return {...envelope,schemaVersion:3,data:this.upgradeState(envelope.data)};
+  if(![1,2,3,4].includes(envelope.schemaVersion))throw Error('Unsupported data version');
+  return {...envelope,schemaVersion:4,data:this.upgradeState(envelope.data)};
  }
 };

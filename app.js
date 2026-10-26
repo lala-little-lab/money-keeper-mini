@@ -36,7 +36,7 @@ function openMoneyPrompt(title,current,cb,opt={}){
 function closeMoneyPrompt(){$('moneyPromptModal').classList.add('hidden');moneyPromptSave=null}
 function saveMoneyPrompt(){let input=$('moneyPromptValue');const raw=input.value,n=raw.trim()?moneyNum(raw):(moneyPromptAllowBlank?0:NaN);if(!Number.isSafeInteger(n)||n<moneyPromptMin){$('moneyPromptError').textContent='金額を確認してね';return}const cb=moneyPromptSave;closeMoneyPrompt();if(cb)cb(n)}
 
-const cats=['食材','コンビニ','カフェ・外食','美容','化粧品・ボディケア・ネイル','服・靴・バッグ・アクセサリー','日用品','雑貨','医療','プロテイン・サプリ','トレーニング','交通・ガソリン','家族','推し活','宿泊','交際費','娯楽','手数料','その他'];
+const cats=['食材','コンビニ','カフェ・外食','美容','化粧品・ケア品','服・靴・小物','日用品','雑貨','医療','プロテイン・サプリ','トレーニング','交通・ガソリン','家族','推し活','宿泊','交際費','娯楽','手数料','その他'];
 const pays=[['cash','現金'],['paypay','PayPay'],['dpay','d払い'],['dcard','dカード'],['id','iD'],['rakuten','楽天カード'],['lumine','ルミネカード'],['epos','エポスカード'],['starbucks','Starbucks'],['suica','Suica'],['seibu','西武信用金庫'],['smbc','三井住友銀行'],['rakbank','楽天銀行'],['yucho','ゆうちょ'],['rakutenpay','楽天Pay'],['edy','楽天Edy'],['paypal','PayPal'],['other','その他']];
 const incomePays=[['seibu','西武信金'],['smbc','三井住友'],['rakbank','楽天銀行'],['yucho','ゆうちょ'],['cash','現金'],['paypay','PayPay'],['suica','Suica'],['starbucks','Starbucks'],['other','その他']];
 const balances={seibu:{name:'西武信用金庫',v:0},rakbank:{name:'楽天銀行',v:0},smbc:{name:'三井住友銀行',v:0},yucho:{name:'ゆうちょ',v:0},cash:{name:'現金',v:0},paypay:{name:'PayPay',v:0},suica:{name:'Suica',v:0},starbucks:{name:'Starbucks',v:0},rakutencash:{name:'楽天Pay残高',v:0}};
