@@ -48,7 +48,7 @@ let loanExtraPerson='',loanExtraDirection='lend';
 let loanGroups=[],loanGroupSerial=0;
 let mkTodos=[],mkTodoHidden={};
 let txs=[],loans=[],cashbook=[],snapshots=[],wishes=[],billAdjustments={},billItemAdjustments={},deletedEventNames=[],mode='expense',loanKind='lend',loanSection='advance',category='',payment='',eventTag='',discount=0,installments=1,from='',to='',chargeTarget='',chargeSource='',histTab='spend',histType='all',histCat='',histPay='',histEvent='',histPeriod='',histStart='',histEnd='',histKeyword='',editingId='',openEventId='',newEventCat='',newEventCatBudgets={},recType='normal',recCategory='',recurringEditIndex=-1,monthlyBudget=190000,transferFeeSide='from',chargeDefaults={paypay:'seibu',suica:'lumine',starbucks:'dcard',rakutencash:'rakbank'},categoryBudgets={},monthlyBudgetHistory={},categoryBudgetHistory={},analysisMonth=new Date().toLocaleDateString('sv-SE').slice(0,7);
-const $=id=>document.getElementById(id),yen=n=>'¥'+Math.round(Number(n)||0).toLocaleString('ja-JP');$('date').value=new Date().toISOString().slice(0,10);
+const $=id=>document.getElementById(id),yen=n=>'¥'+Math.round(Number(n)||0).toLocaleString('ja-JP');$('date').value=new Date().toLocaleDateString('sv-SE');
 // Browser history integration: a navigation is one history entry, not a reload.
 let mkRestoringNavigation=false;
 function mkNavigationButton(id){
@@ -830,8 +830,12 @@ function eventCard(e){
 }
 function renderEvents(){const ef=$('eventForm');if(ef&&ef.dataset.editId&&!ef.classList.contains('hidden'))$('activeEvents').before(ef);$('activeEvents').innerHTML=eventsData.filter(e=>!e.archived).map(eventCard).join('')||'<div class="small">開催中・予定のイベントはありません。</div>';$('archivedEvents').innerHTML=eventsData.filter(e=>e.archived).map(eventCard).join('')||'<div class="small">まだありません。</div>';renderPastEventNames();mkMountEditingEventForm()}
 function toggleEvent(id){openEventId=openEventId===id?'':id;renderEvents()}
-function pastEventNameList(){let active=new Set(eventsData.map(e=>e.name));return [...new Set([...deletedEventNames,...txs.map(t=>t.eventTag).filter(Boolean)])].filter(n=>!active.has(n)).sort((a,b)=>a.localeCompare(b,'ja'))}
-function renderPastEventNames(){let box=$('pastEventNames');if(!box)return;let vals=pastEventNameList(),q=($('newEventName')?.value||'').trim();let filtered=vals.filter(n=>!q||n.includes(q));box.innerHTML=filtered.length?`<div class="small" style="margin-top:6px">過去に使った特別費名</div><div class="pastnames">${filtered.slice(0,8).map(n=>`<button type="button" class="pastname" onclick="usePastEventName('${n.replace(/'/g,"\\'")}')">${n}</button>`).join('')}</div>`:''}
+function pastEventNameList(){let active=new Set(eventsData.map(e=>e.name));return [...new Set(txs.map(t=>t.eventTag).filter(Boolean))].filter(n=>!active.has(n)).sort((a,b)=>a.localeCompare(b,'ja'))}
+function renderPastEventNames(){
+ const box=$('pastEventNames');if(!box)return;const q=($('newEventName')?.value||'').trim(),filtered=pastEventNameList().filter(n=>!q||n.includes(q)).slice(0,8);box.replaceChildren();if(!filtered.length)return;
+ const label=document.createElement('div');label.className='small';label.style.marginTop='6px';label.textContent='過去に使った特別費名';const list=document.createElement('div');list.className='pastnames';
+ for(const name of filtered){const button=document.createElement('button');button.type='button';button.className='pastname';button.textContent=name;button.onclick=()=>usePastEventName(name);list.append(button)}box.append(label,list);
+}
 function usePastEventName(n){$('newEventName').value=n;renderPastEventNames()}
 function mkMountEditingEventForm(){
  const f=$('eventForm');if(!f||f.classList.contains('hidden')||!f.dataset.editId)return;
@@ -861,7 +865,7 @@ function saveEvent(){
 function editEvent(id){let e=eventsData.find(x=>x.id===id);$('eventForm').dataset.editId=id;$('eventFormTitle').textContent='特別費イベントを編集';$('mkEventSaveBtn').textContent='変更を保存';$('newEventName').value=e.name;$('newEventStart').value=e.start||'';$('newEventEnd').value=e.end||'';$('newEventBudget').value=e.budget||'';newEventCatBudgets={...(e.catBudgets||{})};mkEventSelectedCats=[...new Set([...(e.selectedCats||[]),...Object.keys(e.catBudgets||{})])];$('mkEventCatPicker').classList.add('hidden');renderNewEventCatRows();$('eventForm').classList.remove('hidden');mkMountEditingEventForm();refreshMoneyInputs();renderPastEventNames();requestAnimationFrame(()=>window.scrollTo({top:Math.max(0,$('eventForm').getBoundingClientRect().top+window.scrollY-80),behavior:'smooth'}))}
 function resetEventForm(){$('eventForm').dataset.editId='';$('eventFormTitle').textContent='特別費イベントを追加';$('mkEventSaveBtn').textContent='作成';['newEventName','newEventStart','newEventEnd','newEventBudget'].forEach(id=>$(id).value='');newEventCatBudgets={};mkEventSelectedCats=[];$('mkEventCatPicker').classList.add('hidden');renderNewEventCatRows();$('eventError').textContent='';renderPastEventNames()}
 function archiveEvent(id){let e=eventsData.find(x=>x.id===id);e.archived=!e.archived;if(e.archived&&openEventId===id)openEventId='';renderAll()}
-function deleteEvent(id){let e=eventsData.find(x=>x.id===id);if(!e||!e.archived)return;let linked=txs.filter(t=>t.eventTag===e.name).length;if(!confirm('「'+e.name+'」を削除しますか？\n\nイベントの予算・期間などの設定は消えます。'+(linked?'\n紐づく支出記録 '+linked+'件は削除せず、特別費名を記録側に残します。':'')+'\n必要なら同じ名前でイベントを作り直して復活できます。'))return;deletedEventNames.push(e.name);eventsData=eventsData.filter(x=>x.id!==id);recurring.forEach(r=>{if(r.event===e.name)r.event=''});if(openEventId===id)openEventId='';renderAll()}
+function deleteEvent(id){let e=eventsData.find(x=>x.id===id);if(!e||!e.archived)return;let linked=txs.filter(t=>t.eventTag===e.name).length;if(!confirm('「'+e.name+'」を削除しますか？\n\nイベントの予算・期間などの設定は消えます。'+(linked?'\n紐づく支出記録 '+linked+'件は削除せず、特別費名を記録側に残します。':'')+'\n必要なら同じ名前でイベントを作り直して復活できます。'))return;if(linked){if(!deletedEventNames.includes(e.name))deletedEventNames.push(e.name)}else{deletedEventNames=deletedEventNames.filter(n=>n!==e.name)}delete mkEventFixed[id];eventsData=eventsData.filter(x=>x.id!==id);recurring.forEach(r=>{if(r.event===e.name)r.event=''});if(openEventId===id)openEventId='';renderAll()}
 let editingWishIndex=-1;
 function openWishModal(){
  $('wishModal').classList.remove('hidden');

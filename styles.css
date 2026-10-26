@@ -832,3 +832,7 @@ body > #mkRecurringModal > .mk-recurring-sheet {box-sizing:border-box!important;
 #miniLock>div{max-width:400px;width:100%;background:white;border-radius:18px;padding:22px;max-height:100%;overflow:auto}
 #miniLock::backdrop{background:#fff7f9}
 #miniLockNow{width:100%}
+
+.mk-event-cleanup{margin-top:12px;overflow-wrap:anywhere}
+.mk-event-cleanup summary{font-weight:700;cursor:pointer}
+.mk-event-cleanup button{width:100%}
