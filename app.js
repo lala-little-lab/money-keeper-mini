@@ -1330,6 +1330,10 @@ function mkWrapSave(name){const fn=globalThis[name];if(typeof fn!=='function')re
   globalThis[name]=function(...args){const result=fn.apply(this,args);mkQueueSave();return result};
 }
 ['saveSnapshot','addWish','editMonthlyBudget','editCategoryBudget'].forEach(mkWrapSave);
+// #08: Lock overlays preserve the draft; suspend saves until reauthentication.
+let mkReadyBeforeLock=false;
+window.addEventListener('mk-mini-locked',()=>{mkReadyBeforeLock=mkReadyBeforeLock||mkStorageReady;mkStorageReady=false;});
+window.addEventListener('mk-mini-unlocked',()=>{if(mkReadyBeforeLock&&!mkSaveFailed)mkStorageReady=true;mkReadyBeforeLock=false;});
 // Step2 draft: restore persisted data before the first render.
 async function mkBoot(){
   let lastRequestedPage='';try{lastRequestedPage=sessionStorage.getItem('mk-last-page')||''}catch(_){}

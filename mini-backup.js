@@ -1,3 +1,10 @@
+// Japan-time filename, independent of the device timezone. Same-second exports get a suffix.
+let mkBackupLastStamp='',mkBackupSameSecond=0;
+function mkMiniBackupFilename(date=new Date()){
+ const stamp=new Date(date.getTime()+9*60*60*1000).toISOString().slice(0,19).replace(/[-:]/g,'').replace('T','_');
+ if(stamp===mkBackupLastStamp)mkBackupSameSecond++;else{mkBackupLastStamp=stamp;mkBackupSameSecond=0}
+ return 'MK_mini_'+stamp+(mkBackupSameSecond?'_'+(mkBackupSameSecond+1):'')+'.encrypted.json';
+}
 /* Mini encrypted export and explicit replacement restore. No plaintext backup. */
 (()=>{
 function mount(){
@@ -16,7 +23,7 @@ function mount(){
  exp.onclick=async()=>{exp.disabled=true;status.textContent='暗号化ファイルを準備中…';try{
   const obj=await MKStorage.exportEncrypted(mkState());
   const url=URL.createObjectURL(new Blob([JSON.stringify(obj)],{type:'application/json'}));
-  const a=document.createElement('a');a.href=url;a.download='money-keeper-mini-'+new Date().toISOString().slice(0,10)+'.encrypted.json';document.body.appendChild(a);a.click();a.remove();
+  const a=document.createElement('a');a.href=url;a.download=mkMiniBackupFilename();document.body.appendChild(a);a.click();a.remove();
   setTimeout(()=>URL.revokeObjectURL(url),60000);status.textContent='ダウンロードを開始しました。ファイルが保存されたか確認してください。';
  }catch(e){status.textContent='バックアップ失敗：'+e.message}finally{exp.disabled=false}};
  const imp=card.querySelector('#miniImport');
@@ -106,4 +113,10 @@ const MKMemoImport={
   };
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mount);else mount();
+})();
+
+// #08: An explicit lock never deletes business data or changes the password.
+(()=>{const section=document.querySelector('#other section');if(!section)return;
+ const card=document.createElement('div');card.className='card';card.innerHTML='<div class="mid">🔐 ロック</div><p class="small" id="miniSessionStatus">保存状態を確認中…</p><p class="small">解除後24時間は再入力不要です。共有する端末では、使い終わったらロックしてください。</p><button type="button" class="outline" id="miniLockNow">今すぐロック</button>';section.append(card);MKStorage.paintSession();
+ document.getElementById('miniLockNow').onclick=()=>MKStorage.lock();
 })();

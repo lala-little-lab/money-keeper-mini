@@ -825,3 +825,10 @@ body > #mkRecurringModal > .mk-recurring-sheet {box-sizing:border-box!important;
 
 .mk-memo-import-dialog .row>button{width:auto}
 .mk-memo-import-dialog button:disabled{opacity:.5;cursor:default}
+
+/* #08 native modal keeps keyboard/pointer focus inside the lock screen. */
+#miniLock{position:fixed;inset:0;margin:auto;border:0;padding:22px;width:100%;max-width:100%;height:100%;max-height:100%;background:#fff7f9;color:#222;overflow:auto}
+#miniLock[open]{display:flex;align-items:center;justify-content:center}
+#miniLock>div{max-width:400px;width:100%;background:white;border-radius:18px;padding:22px;max-height:100%;overflow:auto}
+#miniLock::backdrop{background:#fff7f9}
+#miniLockNow{width:100%}
