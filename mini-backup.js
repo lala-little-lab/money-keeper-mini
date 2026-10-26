@@ -8,7 +8,7 @@ function mkMiniBackupFilename(date=new Date()){
 /* Mini encrypted export and explicit replacement restore. No plaintext backup. */
 (()=>{
 function mount(){
- const page=document.querySelector('#record section');if(!page)return;
+ const page=document.querySelector('#other section');if(!page)return;
  const card=document.createElement('div');card.className='card';
  card.innerHTML=`<div class="mid">🔐 Miniバックアップ</div>
  <p class="small">暗号化ファイルを端末に保存できます。復元は現在のMiniデータをすべて置き換えます。事前に必ず今のバックアップを保存してください。</p>
@@ -17,7 +17,7 @@ function mount(){
  <div class="field"><label for="miniImportPassword">バックアップ作成時のパスワード</label><input id="miniImportPassword" type="password" autocomplete="off"></div>
  <button class="outline" id="miniImport" type="button">復元する（現在のデータを置換）</button>
  <p class="small" id="miniBackupStatus" role="status" aria-live="polite"></p>`;
- page.appendChild(card);
+ page.insertBefore(card,page.querySelector('#miniLockNow')?.closest('.card')||null);
  const status=card.querySelector('#miniBackupStatus');
  const exp=card.querySelector('#miniExport');
  exp.onclick=async()=>{exp.disabled=true;status.textContent='暗号化ファイルを準備中…';try{
@@ -119,31 +119,4 @@ const MKMemoImport={
 (()=>{const section=document.querySelector('#other section');if(!section)return;
  const card=document.createElement('div');card.className='card';card.innerHTML='<div class="mid">🔐 ロック</div><p class="small" id="miniSessionStatus">保存状態を確認中…</p><p class="small">解除後24時間は再入力不要です。共有する端末では、使い終わったらロックしてください。</p><button type="button" class="outline" id="miniLockNow">今すぐロック</button>';section.append(card);MKStorage.paintSession();
  document.getElementById('miniLockNow').onclick=()=>MKStorage.lock();
-})();
-
-// #09: Inspect obsolete event metadata; never auto-clean on load or restore.
-function mkEventCleanupPlan(state){
- const used=new Set(state.txs.map(t=>t.eventTag).filter(Boolean)),names=new Set(state.eventsData.map(e=>e.name)),ids=new Set(state.eventsData.map(e=>e.id));
- return {names:[...new Set(state.deletedEventNames.filter(n=>!used.has(n)&&!names.has(n)))],fixedIds:Object.keys(state.mkEventFixed).filter(id=>!ids.has(id))};
-}
-(()=>{
- const section=document.querySelector('#events section');if(!section)return;
- const card=document.createElement('details');card.className='card mk-event-cleanup';card.innerHTML='<summary>削除済みイベントの情報を整理</summary><p class="small">残っている記録で使われていない削除済みの名前と、削除済みイベントの固定設定だけを整理します。現在のイベント・記録・メモ候補・予算は残します。</p><p class="small">先に現在の暗号化バックアップを保存してください。</p><button type="button" class="outline" id="mkEventCleanupPreview">整理する内容を確認</button><p class="small" id="mkEventCleanupStatus" role="status" aria-live="polite"></p>';section.append(card);
- const dialog=document.createElement('dialog');dialog.id='mkEventCleanupDialog';dialog.className='mk-memo-import-dialog';dialog.setAttribute('aria-labelledby','mkEventCleanupTitle');dialog.innerHTML='<h2 id="mkEventCleanupTitle">削除済みイベント情報の整理</h2><p class="small" id="mkEventCleanupCounts"></p><ul id="mkEventCleanupRows"></ul><p class="small">ここに表示した内部情報を削除して暗号化保存します。取り消す場合は整理前のバックアップからの全置換復元が必要です。</p><p class="small" id="mkEventCleanupError" role="status" aria-live="polite"></p><div class="row"><button type="button" class="outline" id="mkEventCleanupCancel">キャンセル</button><button type="button" class="btn" id="mkEventCleanupCommit">削除する</button></div>';document.body.append(dialog);
- const preview=$('mkEventCleanupPreview'),commit=$('mkEventCleanupCommit'),cancel=$('mkEventCleanupCancel'),status=$('mkEventCleanupStatus'),error=$('mkEventCleanupError');let plan=null,baseline='',busy=false;
- function ready(){if(!mkStorageReady||mkSaveFailed||!MKStorage.isUnlocked())throw Error('保存を利用できません。ロックや保存状態を確認してください。');if(mkPendingSaves)throw Error('保存中です。「保存済み」になってから確認してください。')}
- function close(){if(busy)return;dialog.close();plan=null;baseline=''}cancel.onclick=close;dialog.addEventListener('cancel',e=>{e.preventDefault();close()});
- preview.onclick=()=>{status.textContent='';try{ready();const state=structuredClone(mkState());baseline=JSON.stringify(state);plan=mkEventCleanupPlan(state);$('mkEventCleanupCounts').textContent=`不要な名前 ${plan.names.length}件・削除済みイベントの固定設定 ${plan.fixedIds.length}件`;
-  const list=$('mkEventCleanupRows');list.replaceChildren();for(const name of plan.names){const li=document.createElement('li');li.textContent='削除する名前：'+name;list.append(li)}if(plan.fixedIds.length){const li=document.createElement('li');li.textContent=plan.fixedIds.length+'件の固定設定（対象イベントは削除済みのため、名前は残っていません）';list.append(li)}
-  commit.disabled=!(plan.names.length||plan.fixedIds.length);error.textContent=commit.disabled?'整理する情報はありません。':'対象を確認してから削除してください。';dialog.showModal();
- }catch(e){status.textContent=e.message;plan=null}};
- commit.onclick=async()=>{if(busy||!plan)return;let snapshot;
-  try{ready();snapshot=structuredClone(mkState());if(JSON.stringify(snapshot)!==baseline)throw Error('データが変更されました。キャンセルして確認し直してください。')}
-  catch(e){error.textContent=e.message;commit.disabled=true;return}
-  const removed=new Set(plan.names);snapshot.deletedEventNames=snapshot.deletedEventNames.filter(n=>!removed.has(n));for(const id of plan.fixedIds)delete snapshot.mkEventFixed[id];
-  busy=true;commit.disabled=true;cancel.disabled=true;mkStorageReady=false;mkPendingSaves++;mkSaveStatus('整理した情報を保存中…');error.textContent='保存中…';
-  try{await MKStorage.save(snapshot)}catch(e){error.textContent='保存できませんでした。整理前の情報を保持しています。キャンセルして再度お試しください。';mkSaveStatus('整理失敗：元のデータを保持',true);return}
-  finally{mkPendingSaves--;mkStorageReady=MKStorage.isUnlocked()&&!mkSaveFailed;if(!MKStorage.isUnlocked()&&!mkSaveFailed)mkReadyBeforeLock=true;busy=false;cancel.disabled=false}
-  deletedEventNames=snapshot.deletedEventNames;mkEventFixed=snapshot.mkEventFixed;renderPastEventNames();mkRenderEventSuggestion();mkSaveStatus('保存済み ✓');status.textContent='表示した不要な情報を削除し、暗号化保存しました。';close();
- };
 })();
