@@ -1,6 +1,6 @@
 /* Mini business-data migration; encrypted envelope remains version 1. */
 const MKMigrations={
- currentVersion:4,
+ currentVersion:5,
   renameCategories(data){
     const aliases={'化粧品・ボディケア・ネイル':'化粧品・ケア品','化粧品・ボディケア品':'化粧品・ケア品','化粧品・ボディケア':'化粧品・ケア品','服・靴・バッグ・アクセサリー':'服・靴・小物'};
     const name=x=>Object.hasOwn(aliases,x)?aliases[x]:x;
@@ -21,6 +21,16 @@ const MKMigrations={
  for(const w of data.words){if(!w||typeof w.id!=='string'||!w.id||wid.has(w.id)||typeof w.text!=='string'||!w.text.trim()||wn.has(w.text.trim())||!ids.has(w.group)||!Array.isArray(w.cats)||w.cats.some(c=>typeof c!=='string'))throw Error('メモの言葉が正しくありません。');wid.add(w.id);wn.add(w.text.trim())}
  return data;
 },
+ validateSplits(data){
+  const categories=['食材','コンビニ','カフェ・外食','美容','化粧品・ケア品','服・靴・小物','日用品','雑貨','医療','プロテイン・サプリ','トレーニング','交通・ガソリン','家族','推し活','宿泊','交際費','娯楽','手数料','その他'];
+  if(!Array.isArray(data.txs))throw Error('記録の形式が正しくありません。');
+  for(const t of data.txs){
+   if(!t||typeof t!=='object')throw Error('記録の形式が正しくありません。');
+   if(t.categorySplits===undefined)continue;
+   const rows=t.categorySplits;
+   if(!['expense','lend','borrowed'].includes(t.type)||!Number.isSafeInteger(t.amount)||t.amount<0||!Array.isArray(rows)||rows.length<2||rows.length>categories.length||rows.some(r=>!r||!categories.includes(r.category)||!Number.isSafeInteger(r.amount)||r.amount<0)||new Set(rows.map(r=>r.category)).size!==rows.length||t.category!==rows[0].category||rows.reduce((n,r)=>n+BigInt(r.amount),0n)!==BigInt(t.amount)||(t.points!==undefined&&(!Number.isSafeInteger(t.points)||t.points<0||t.points>t.amount)))throw Error('カテゴリ内訳・合計・ポイントが正しくありません。');
+  }
+ },
  upgradeState(state){
   if(!state||typeof state!=='object'||Array.isArray(state))throw Error('保存データの形式が正しくありません。');
   const version=state.miniSchemaVersion===undefined?1:state.miniSchemaVersion;
@@ -44,11 +54,11 @@ const MKMigrations={
    if(!Array.isArray(e.selectedCats)||e.selectedCats.some(c=>typeof c!=='string'))throw Error('特別費のカテゴリ設定が正しくありません。');
   }
   data.miniSchemaVersion=this.currentVersion;
-  return this.renameCategories(data);
+  this.renameCategories(data);this.validateSplits(data);return data;
  },
  upgrade(envelope){
   if(!envelope||typeof envelope!=='object'||!Number.isInteger(envelope.schemaVersion))throw Error('Unversioned database');
-  if(![1,2,3,4].includes(envelope.schemaVersion))throw Error('Unsupported data version');
-  return {...envelope,schemaVersion:4,data:this.upgradeState(envelope.data)};
+  if(![1,2,3,4,5].includes(envelope.schemaVersion))throw Error('Unsupported data version');
+  return {...envelope,schemaVersion:5,data:this.upgradeState(envelope.data)};
  }
 };
