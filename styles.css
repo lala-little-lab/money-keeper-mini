@@ -844,3 +844,43 @@ body > #mkRecurringModal > .mk-recurring-sheet {box-sizing:border-box!important;
 
 button.history-item-meta.mk-history-toggle{width:100%;text-align:left;border:0;background:none;padding:0;color:var(--muted);font-weight:400;cursor:pointer}
 button.history-item-meta.mk-history-toggle.expanded{display:block;-webkit-line-clamp:unset;white-space:normal;overflow:visible;overflow-wrap:anywhere}
+
+/* Mini14 record/member UI from reference100; no group management page. */
+#mkGroupSwitchRow{display:flex;justify-content:flex-end;margin:-2px 0 8px;min-height:30px}
+#mkGroupSwitchRow.hidden{display:none}
+.mk-group-person-row{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) minmax(0,1fr) 30px;gap:6px;align-items:end;margin:8px 0}
+.mk-group-person-row label{font-size:11px;color:#777;min-width:0}
+.mk-group-person-row input{width:100%;min-width:0;font-size:13px;padding:8px 4px}
+.mk-group-person-row button{padding:6px;min-height:34px}
+.mk-group-participants{margin-bottom:12px}
+.mk-group-participants summary{font-size:13px;color:#81767c;cursor:pointer}
+#mkGroupForm .field label{font-size:12px}
+#mkGroupSwitchRow{align-items:center;gap:8px}
+#mkGroupSwitchRow .mk-group-switch{margin-left:auto;flex:none;white-space:nowrap}
+#mkGroupTabs{flex:0 1 auto;flex-wrap:nowrap;min-width:0;margin:0}
+#mkGroupTabs .mini{flex:none;white-space:nowrap}
+#recordTopGrid:has(#mkGroupNameField:not(.hidden)){grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+#mkGroupNameField{min-width:0}
+.mk-group-money-note{margin:0 0 12px;font-size:11px}
+.mk-group-person-row .money-input.mk-money-input .money-prefix{font-size:12px;padding-left:5px}
+.mk-group-person-row .money-input.mk-money-input input{font-size:13px!important;padding-left:3px!important}
+.mk-group-money-note{display:inline;font-size:10px;font-weight:400;color:#827981;margin-left:5px}
+.mk-member-heading{display:flex;align-items:center;gap:10px;margin:8px 0;color:#555;font-size:13px}
+.mk-member-add{padding:3px 7px;min-height:24px;border:0;background:#f3f2f3;border-radius:7px;font-size:11px;font-weight:400;color:#827981;white-space:nowrap}
+.mk-group-participants{margin-bottom:14px}
+.mk-group-label-row{display:flex;align-items:center;gap:5px;margin-bottom:5px;white-space:nowrap}
+.field .mk-group-label-row label{margin:0;flex:none}
+.mk-group-label-row .mk-member-add{font-size:9px;padding:3px 4px;min-height:22px}
+.mk-member-heading{gap:5px;flex-wrap:nowrap;font-size:12px}
+.mk-member-heading strong{white-space:nowrap}
+.mk-member-heading .mk-member-add{font-size:10px;padding:4px 5px;flex:none}
+.mk-group-calc-hint:empty{display:none}
+.mk-group-calc-hint{color:var(--bad);margin-top:5px}
+#mkMemberModal{z-index:150}
+#mkMemberModal .sheet{max-height:85dvh;overscroll-behavior:contain}
+#mkMemberModal .sheet-title{margin:0}
+.mk-member-draft-row{display:flex;gap:8px;margin:10px 0}
+.mk-member-draft-row input{min-width:0;flex:1}
+#mkMemberSave{margin-top:15px}
+#mkMemberError{margin-top:10px}
+#loanSections{display:flex;flex-wrap:wrap;gap:5px}#loanSections.hidden{display:none}#loanSections .mini{flex:none;white-space:nowrap}#mkGroupSwitchRow{justify-content:flex-start}#mkGroupNameField input{min-width:0}
