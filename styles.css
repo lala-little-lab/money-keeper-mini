@@ -884,3 +884,20 @@ button.history-item-meta.mk-history-toggle.expanded{display:block;-webkit-line-c
 #mkMemberSave{margin-top:15px}
 #mkMemberError{margin-top:10px}
 #loanSections{display:flex;flex-wrap:wrap;gap:5px}#loanSections.hidden{display:none}#loanSections .mini{flex:none;white-space:nowrap}#mkGroupSwitchRow{justify-content:flex-start}#mkGroupNameField input{min-width:0}
+
+/* Mini 15: reference #100 recording controls; no settings UI. */
+#record #modes{display:flex;flex-wrap:nowrap;gap:6px;align-items:center}
+#record #modes .mode-choice{padding:10px 11px;white-space:nowrap;flex:0 0 auto}
+#record .interaction-row{gap:6px;flex-wrap:nowrap}
+#record #interactionModeBtn{padding:10px 11px;white-space:nowrap;flex:none}
+#record #loanSections{display:flex;gap:5px;flex:0 1 auto;min-width:0}
+#record #loanSections.hidden{display:none}
+#record #loanSections .mini{flex:0 0 auto;min-width:0;padding:7px 7px;font-size:11px;white-space:nowrap}
+#record #recordResetBtn{flex:none;margin-left:auto}
+#record #mkGroupSwitchRow{margin-top:8px}
+
+/* Currency decoration uses the shared input formatter. */
+.mk-split-money .money-input.mk-money-input input{font-size:14px!important;padding:10px 6px}
+.mk-split-money .money-input.mk-money-input .money-prefix{font-size:14px;padding-left:8px}
+#chargeTargets .mini,#chargeSources .mini{font-weight:400}
+#chargeTargets .mini.active,#chargeSources .mini.active{font-weight:700}
